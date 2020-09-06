@@ -57,7 +57,8 @@ sitl = None
 
 ###########################################################################
 from user_management import UserManagemet
-
+from mision_management import MisionManagement
+from drone_management import DroneManagement
 
 ###########################################################################
 CORS(app, resources={r"/login":{"origins":"*"},
@@ -282,7 +283,6 @@ def capturaContinua(numeroCapturasAsincronas, intervaloCapturasAsincronas, a, n,
 # @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def login():
     data = request.get_json()
-    data['errorBd'] = ""
     nombreUsuario= data["nombreUsuario"]
     password= data["password"]
     return UserManagemet.login(nombreUsuario, password)
@@ -291,26 +291,10 @@ def login():
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def registro():
     data = request.get_json()
-    data['errorBd'] = ""
     
     nombreUsuario= data["nombreUsuario"]
     password= data["password"]
-    try:
-        # reemplazar por DAO
-        usuario = Usuarios()
-        usuario.nombre = nombreUsuario
-        usuario.contrasena = password
-        conn = conexion()
-        daoUsuarios = DaoUsuarios(conn)
-        daoUsuarios.guardarUsuario(usuario)
-        conn.close()
-        if usuario == "F":
-            data['errorBd']= "T"
-
-    except:
-        data['errorBd'] = "T"
-    # print(data.get('errorBd'))
-    return json.dumps(data)
+    return UserManagemet.registro(nombreUsuario, password)
 
 @app.route('/crearMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -328,30 +312,16 @@ def crearMision():
     modo_vuelo = data["modoVuelo"]
     modo_adq = data["modoAdquisicion"]
 
+    drone = DroneManagement()
+    drone.velocidad = velocidad
+    drone.id_espectros = id_espectros
+    drone.firstHome = firstHome
+    drone.numeroWaypoint = numeroWaypoint
+
     print("nombremision = " + nombreMisionCrear + " " + "elevacion = " + elevacion + " " + "velocidad = " + velocidad + " " + "modoVuelo = " + modo_vuelo + " " + "Modo de Adquisicion =" + modo_adq)
-    
-    try:
-        conn = conexion()
-        daoUsuarios = DaoUsuarios(conn)
-        usuario = daoUsuarios.getUsuarioNombre(nombreUsuario)
-        idUsuario = usuario.id
-        mision = Mision()
-        mision.nombre = nombreMisionCrear
-        mision.elevacion = elevacion
-        mision.velocidad = velocidad
-        mision.modo_vuelo = modo_vuelo
-        mision.modo_adq = modo_adq
-        mision.usuarios_id = idUsuario
-        daoMision = DaoMision(conn)
-        mision = daoMision.guardarMision(mision)
-        conn.close()
-        if mision == None:
-           data['errorBd'] = "T" 
-    except:
-        data['errorBd'] = "T"
-        print("error en BD")
-    print(data.get('errorBd'))
-    return json.dumps(data)
+    return MisionManagement.crearMision(
+        nombreMisionCrear, elevacion, velocidad, modo_vuelo, modo_adq, nombreUsuario
+    )
 
 @app.route('/conectarDron', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])

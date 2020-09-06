@@ -1,18 +1,18 @@
-class MisionManagement():
+class DroneManagement():
 
-    class __MisionManagement:
+    class __DroneManagement:
         def __init__(self):
             velocidad = None
             id_espectros = None
             firstHome = None
             numeroWaypoint = None
-            
+                        
     instance = None
 
     def __new__(self):
-        if not MisionManagement.instance:
-            MisionManagement.instance = MisionManagement.__MisionManagement()
-        return MisionManagement.instance
+        if not DroneManagement.instance:
+            DroneManagement.instance = DroneManagement.__DroneManagement()
+        return DroneManagement.instance
 
     def __getattr__(self, attr):
         return getattr(self.instance, attr)
