@@ -2,7 +2,7 @@ import os
 from os import path
 
 class FileManagement():
-
+    @staticmethod
     def to_relative(route: str, script_dir: str = ""):
         file_dir = route.replace("/", '\\')
         if script_dir == "":
