@@ -1,0 +1,546 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+		   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+		   crossorigin=""/>
+		
+		
+		<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+		   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+		   crossorigin=""></script>
+		
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<script src="jquery.js"></script>
+		<style>
+			#mapid { 
+				height: 100%; 
+			}
+			
+			body{
+				font-size:0.9rem;
+			}
+			
+			.btn{
+				font-size:0.8rem;
+			}
+			.btn-secondary{
+				font-size:0.8rem;
+			}
+			.form-control{
+				font-size:0.7rem;
+			}
+			#waypointsTextArea{
+				font-size:0.7rem;
+				white-space: nowrap;
+			}
+			
+			hr {
+				margin-top: 0.6rem;
+				margin-bottom: 0.6rem;
+			}
+		</style>
+		
+		<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/js/bootstrap.min.js" integrity="sha384-3qaqj0lc6sV/qpzrc1N5DC6i1VRn/HyX4qdPaiEFbn54VjQBEU341pvjz7Dv3n6P" crossorigin="anonymous"></script>
+	
+	</head>
+	
+	<body>
+	
+	<ul class="nav nav-tabs" id="myTab" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" id="home-tab" data-toggle="tab" href="#tabMision" role="tab" aria-controls="tabMision" aria-selected="true">Configuracion de Misión</a>
+		</li><li class="nav-item">
+			<a class="nav-link" id="profile-tab" data-toggle="tab" href="#tabSensores" role="tab" aria-controls="tabSensores" aria-selected="true">Configuración de Sensores</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab1" data-toggle="tab" href="#tabControl" role="tab" aria-controls="tabControl" aria-selected="false">Control de Misión</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab2" data-toggle="tab" href="#tabData" role="tab" aria-controls="tabData" aria-selected="false">Análisis de Datos</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab3" data-toggle="tab" href="#tabAyuda" role="tab" aria-controls="tabAyuda" aria-selected="false">Ayuda</a>
+		</li>
+	</ul>
+	<div class="tab-content" id="myTabContent">
+		<div class="tab-pane fade show active" id="tabMision" role="tabpanel" aria-labelledby="home-tab">
+			asd
+		</div>
+		<div class="tab-pane fade" id="tabSensores" role="tabpanel" aria-labelledby="profile-tab">
+			asdvbgh
+		</div>
+		<div class="tab-pane fade" id="tabControl" role="tabpanel" aria-labelledby="profile-tab1">
+			<div class="container-fluid h-100 border">
+				<div class="row" style="min-height:30%">
+					<div class="col-md-3 border">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="row">
+									<h5>Información de la misión</h5>
+									<div class="col-md-12 form-group">
+										<label for="nombremision">Nombre de la misión</label>
+										<input type="text" class="form-control form-control-sm mb-n2" id="nombremision" placeholder="Ingrese el nombre de la misión">
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnNuevaMision">Nueva Misión</button></div>
+									<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnPausarMision">Pausar Misión</button></div>
+								</div>
+								<div class="row mt-1">
+									<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnReanudarMision">Reanudar Misión</button></div>
+									<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnDetenerMision">Detener Misión</button></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-7 border">
+						<div class="row">
+							<div class="col-md-6">
+								<h5>Configuracion de sensores</h5>
+								<div class="row ml-1 mr-n1">
+									<div class="col-md-6 mt-n1">
+										<h6>Sensores de tierra</h6>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorTierraVIS">Número de serie VIS</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorTierraVIS" placeholder="">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorTierraNIR">Número de serie NIR</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorTierraNIR" placeholder="">
+											</div>
+										</div>
+									</div>
+									<div class="col-md-6 mt-n1">
+										<h6>Sensores de vuelo</h6>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorVueloVIS">Número de serie VIS</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorVueloVIS" placeholder="">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorVueloNIR">Número de serie NIR</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorVueloNIR" placeholder="">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<br>
+								<div class="container">
+									<div class="row mt-2">
+										<h6>Parametros de calibración</h6>
+									</div>
+									<div class="row mt-1">
+										<div class="form-group mt-n1">
+											<label for="tiempoIntegracion">Tiempo de integración</label>
+											<input type="text" class="form-control form-control-sm mb-n3" id="tiempoIntegracion" placeholder="(Milisegundos)">
+										</div>
+										<div class="form-group mt-n1 ml-4">
+											<label for="numeroCapturas">Numero de capturas</label>
+											<input type="text" class="form-control form-control-sm mb-n2" id="numeroCapturas" placeholder="">
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-6">
+											<div class="row">
+												<button type="button" class="btn btn-secondary btn-sm w-100 mr-3" id="btnCalibrar">Calibrar</button>
+											</div>
+											
+										</div>
+										
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-md-2 border">
+						<h5>Opciones de conexión</h5>
+						<div class="container">
+							<div class="row">
+								<button type="button" class="btn btn-secondary btn-sm w-100" id="btnConectar">Conectar</button>
+							</div>
+							<div class="row">
+								<button type="button" class="btn btn-secondary btn-sm w-100 mt-1" id="btnDesconectar">Desconectar</button>
+							</div>
+							<div class="row">
+								<input type="text" class="form-control mt-2" id="statusText" placeholder="Status" readonly>  
+							</div>
+						</div>
+					</div>
+				</div>
+			
+				<div class="row" style="height:70%">
+					<div class="col-md-2 border">
+						<h5>Waypoints</h5>
+						<textarea class="form-control" id="waypointsTextArea" rows="12"></textarea>
+						<div class="form-group row mt-1">
+							<label for="elevacion" class="col-sm-5 col-form-label">Elevacion</label>
+							<div class="col-sm-7">
+								<input type="text" class="form-control" id="elevacion">
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnGuardarWaypoints">Guardar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" id="btnActualizarWaypoints">Actualizar</button></div>
+							
+						</div>
+						
+						<div class="row mt-1">
+							<div class="col-md-12"><button id="deleteWaypointButton" class="btn btn-secondary btn-sm w-100">Borrar el ultimo waypoint</button></div>
+						</div>
+						
+					</div>
+					
+					<div class="col-md-8 border">
+						<div class="row" style="height:90%">
+							<div class="col-md-12">
+								<div id="mapid"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-md-2 border">
+						<div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Norte</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelNorte"></label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Altitud</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelAltitud"></label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Batería</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelBateria"></label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Irradancia</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelIrradancia"></label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Wp actual</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelWpActual"></label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-n3">
+									<label>Estado wp</label>
+								</div>
+								<div class="col-md-6 mb-n3">
+									<label id="labelEstadoWp"></label>
+								</div>
+							</div>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-md-12 mb-n2">
+								<label>Modo de adquisición</label>
+							</div>
+							<div class="col-md-5">
+								<button id="btnModoManual" class="btn btn-secondary btn-sm w-100">Manual</button>
+							</div>
+							<div class="col-md-6">
+								<button id="btnModoManual" class="btn btn-secondary btn-sm w-100">Auto</button>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<label class="mb-n1" for="numeroEspectros">Número de espectros</label>
+							<input type="text" class="form-control form-control-sm mb-n2" id="numeroEspectros" placeholder="">
+						</div>
+						
+						<div class="form-group">
+							<label class="mb-n1" for="intervaloCapturas">Intervalo de capturas</label>
+							<input type="text" class="form-control form-control-sm mb-n2" id="intervaloCapturas" placeholder="">
+						</div>
+						
+						<div class="row">
+							<div class="col-md">
+								<button id="btnCapturar" class="btn btn-secondary btn-sm w-100">Capturar</button>
+							</div>
+							
+						</div>
+						
+						<div class="row mt-1">
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100 mt-1" id="btnArmar">Armar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100 mt-1" id="btnDesarmar">Desarmar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100 mt-1" id="btnVolver">Volver</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100 mt-1" id="btnAterrizar">Aterrizar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100 mt-1" data-toggle="button" aria-pressed="false" id="btnHover">Hover</button></div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="tabData" role="tabpanel" aria-labelledby="profile-tab2">
+			<div class="container-fluid border">
+				<div class="row justify-content-sm-left" style="min-height:100%">
+					<div class="col-md-12">
+						<div class="row" style="max-height:15%">
+							<h5>Visualización y Descarga de Información</h5>
+						</div>
+						<div class="row">
+							<div class="col-md-3 border">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="misionesGuardadas">Misiones Guardadas</label>
+										<select multiple class="form-control" id="misionesGuardadas">
+	 										<option>Misión 1</option>
+	  										<option>Misión 2</option>
+	  										<option>Misión 3</option>
+	  										<option>Misión 4</option>
+	  										<option>Misión 5</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6">
+										<div class="btn-secondary btn-sm w-100" id="btnSeleccionarMision">Seleccionar</div>
+									</div>
+									<div class="col-md-6">
+										<div class="btn-secondary btn-sm w-100" id="btnBorrarMision">Borrar</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<label for="nombreMisionGuardada">Nombre de Misión</label>
+										<select multiple class="form-control" id="waypointsMisionGuardada">
+	 										<option>Waypoint 1</option>
+	  										<option>Waypoint 2</option>
+		  									<option>Waypoint 3</option>
+		  									<option>Waypoint 4</option>
+		  									<option>Waypoint 5</option>
+		  									<option>Waypoint 6</option>
+		  									<option>Waypoint 7</option>
+		  									<option>Waypoint 8</option>
+		  									<option>Waypoint 9</option>
+		  									<option>Waypoint 10</option>
+		  									<option>Waypoint 11</option>
+		  									<option>Waypoint 12</option>
+		  									<option>Waypoint 13</option>
+		  									<option>Waypoint 14</option>
+		  									<option>Waypoint 15</option>
+		  									<option>Waypoint 16</option>
+		  									<option>Waypoint 17</option>
+		  									<option>Waypoint 18</option>
+		  									<option>Waypoint 19</option>
+		  									<option>Waypoint 20</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6">
+										<div class="btn-secondary btn-sm w-100" id="btnVerWaypoint">Ver Espectro</div>
+									</div>
+									<div class="col-md-6">
+										<div class="btn-secondary btn-sm w-100" id="btnGuardarWaypoint">Guardar Espectro</div>
+									</div>
+									<div class="col-md-8 mt-1 ml-5">
+										<button type="button" class="btn btn-secondary btn-sm btn-block" id="btnGuardarTodos">Guardar Todos</button>
+										<!-- <div class="btn-secondary btn-sm btn-block" id="btnguardartodos">Guardar Todos</div> -->
+									</div>
+								</div>
+							</div>
+							<div class="col-md-9 border ml-n3">
+								<div class="row justify-content-sm-center" style="max-height:5%">
+									<h5>Espectro Electromagnético</h5>
+								</div>
+								<div class="media mt-n2">
+									<img src="Figure_2.png" class="align-self-end mr-3" id="espectro" style="max-height:100%; max-width:100%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+								</div>
+							</div>
+						</div>
+						
+						
+					</div>
+					
+					
+					<div class="col-md-12 border">
+						
+					</div>
+
+			</div>
+			</div>
+			
+		</div>
+	</div>
+	</body>
+	
+	<script>
+		var mymap = L.map('mapid').setView([3.373272,-76.529766], 20);
+		
+		
+		//Llamar opciones del mapa para que se muestre (Regularmente no se toca)
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+			maxZoom: 22,
+			id: 'mapbox.streets',
+			accessToken: 'pk.eyJ1IjoiY2FtaWxvcXVpbnRlcm9wIiwiYSI6ImNqeWo0M2NodzAxODQzbm84Z2UzamJxZ2EifQ.D_RjbBtVT9RX-4B7Ts8rYA'
+		}).addTo(mymap);
+		
+		
+		var waypoints = [];
+		var lines = [];
+		var anterior = null;
+		var drone = null;
+		
+		function onMapClick(e) {
+			waypoints.push({"marker":L.marker(e.latlng).addTo(mymap), "reached":false});	
+			$("#waypointsTextArea").append(e.latlng.lat+","+e.latlng.lng+"\n"); //referenciar objeto html
+
+			drawLines();
+			anterior = e.latlng;
+			console.log(e.latlng);
+		}
+		
+		function drawLines(){
+			removeLines();
+			anterior = null;
+			for(i in waypoints){
+				var pos = 	[waypoints[i].marker._latlng.lat, waypoints[i].marker._latlng.lng];
+				if(anterior != null){
+					var dots = [anterior, pos];
+					if(waypoints[i].reached){
+						line = L.polyline(dots, {color: 'red'}).addTo(mymap);
+					}
+					else{
+						line = L.polyline(dots).addTo(mymap);
+					}
+					lines.push(line);
+				}
+				anterior = pos;
+			}
+		}
+		
+		function removeLines(){
+			//console.log(lines);
+			for(i in lines){
+				lines[i].remove();
+			}
+			lines = [];
+		}
+
+		mymap.on('click', onMapClick);
+		
+		$( document ).ready(function() {
+			
+			$( "#deleteWaypointButton" ).mouseup(function() {
+				var last = waypoints.pop().marker;
+				if(last!=null){
+					last.remove();
+					drawLines();
+				}
+			});
+			
+			drone = L.marker([3.373272,-76.529766], {icon: myIcon}).addTo(mymap);
+			setInterval(function(){ simulatedMovementTowardsMarkers(drone); }, 100);
+		});
+		
+		var myIcon = L.icon({
+			iconUrl: 'drone.png',
+			iconSize: [32, 32]
+		});
+		
+		
+		function getDroneLatLng(){
+		
+		}
+		
+		function simulatedMovementTowardsMarkers(){
+			for(i in waypoints){
+			 	
+				if(!waypoints[i].reached){
+					var markerLat = 	waypoints[i].marker._latlng.lat;
+					var markerLng = 	waypoints[i].marker._latlng.lng;
+					var droneLat  =     drone._latlng.lat;
+					var droneLng  =     drone._latlng.lng;
+					
+					var latDif = markerLat - droneLat;
+					var lngDif = markerLng - droneLng;
+			
+					
+					if(!droneReachedPoint(latDif, lngDif)){
+					
+						if(Math.abs(latDif) > 0.000002){
+							if(latDif > 0){
+								droneLat = droneLat + 0.000001;
+							}
+							else{
+								droneLat = droneLat - 0.000001;
+							}
+						}
+						
+						if(Math.abs(lngDif) > 0.000002){
+							if(lngDif > 0){
+								droneLng = droneLng + 0.000001;
+							}
+							else{
+								droneLng = droneLng - 0.000001;
+							}
+						}
+						
+						////////////////////////////////////////////////////////
+						//Esta función mueve el dron en el mapa de posicion/////
+						var actualLatLng = drone.getLatLng();
+						actualLatLng.lat = droneLat; 
+						actualLatLng.lng = droneLng;
+						
+						drone.setLatLng(actualLatLng);
+						////////////////////////////////////////////////////////
+						////////////////////////////////////////////////////////
+					}
+					else{
+						waypoints[i].reached = true;
+						drawLines();
+					}
+					
+					break;
+				}
+			}
+		}
+		
+		function droneReachedPoint(latDif, lngDif){		
+			if(Math.abs(latDif) > 0.000002){
+				return false;
+			}
+			
+			if(Math.abs(lngDif) > 0.000002){
+				return false;
+			}
+			
+			return true;
+			
+		}
+		
+	</script>
+</html>

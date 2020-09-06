@@ -1,0 +1,1553 @@
+<html>
+	<head>
+
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+		   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+		   crossorigin=""/>
+		
+		
+		<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+		   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+		   crossorigin=""></script>
+		
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		
+		<style>
+			#mapid { 
+				height: 100%; 
+			}
+			
+			body{
+				font-size:0.9rem;
+			}
+			
+			.btn{
+				font-size:0.8rem;
+			}
+			.btn-primary{
+				/*background-color:#6b5b95 !important;*/
+				font-size:0.8rem;
+			}
+			.form-control{
+				font-size:0.7rem;
+			}
+			#waypointsTextArea{
+				font-size:0.7rem;
+				white-space: nowrap;
+			}
+			hr {
+				margin-top: 0.6rem;
+				margin-bottom: 0.6rem;
+			}
+			
+		</style>
+		
+		<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/js/bootstrap.min.js" integrity="sha384-3qaqj0lc6sV/qpzrc1N5DC6i1VRn/HyX4qdPaiEFbn54VjQBEU341pvjz7Dv3n6P" crossorigin="anonymous"></script>
+	
+
+	</head>
+	
+	<body>
+		<div class="row" style="height: 13%">
+			<div class="col-md-1 ml-4">
+				<div class="cropped">
+				    <img src="logouv.png" class="align-self-end mr-3" style="max-height:60%; max-width:60%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+			    </div>
+			</div>
+			<div class="col-md-1 mt-2 ml-n4 mr-4">
+				<div class="cropped">
+				    <img src="psi.png" class="align-self-end mr-3" style="max-height:140%; max-width:140%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+			    </div>
+			</div>
+			<div class="col-md-7 mt-4">
+				<p class="text-center font-weight-bold">SISTEMA DE GESTIÓN DE VUELO E INFORMACIÓN DE UN CUADRICÓPTERO PARA EL MAPEO DE CONTENIDO DE NITRÓGENO DE UN CULTIVO USANDO MICROSENSORES ESPECTRALES</p>
+
+			</div>
+			<div class="col-md-2 mt-3">
+				<div class="cropped">
+				    <img src="logogici.png" class="align-self-end mr-3" style="max-height:60%; max-width:60%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+			    </div>
+			</div>
+		</div>
+		<!-- <ul id="myTab" class="nav nav-tabs">
+		  <li class="active">
+		  	<a href="#home" data-toggle="tab">Home</a>
+		  </li>
+		  <li class=""><a href="#profile" data-toggle="tab">Profile</a></li>
+		</ul> -->
+	<ul class="nav nav-tabs" id="myTab" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" id="home-tab" data-toggle="tab" href="#tabMision" role="tab" aria-controls="tabMision" aria-selected="true">Configuracion de Misión</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab" data-toggle="tab" href="#tabSensores" role="tab" aria-controls="tabSensores" aria-selected="false">Configuración de Sensores</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab1" data-toggle="tab" href="#tabControl" role="tab" aria-controls="tabControl" aria-selected="false">Control de Misión</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab2" data-toggle="tab" href="#tabData" role="tab" aria-controls="tabData" aria-selected="false">Análisis de Datos</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="profile-tab3" data-toggle="tab" href="#tabAyuda" role="tab" aria-controls="tabAyuda" aria-selected="false">Ayuda</a>
+		</li>
+	</ul>
+	<div class="tab-content" id="myTabContent">
+		<div class="tab-pane fade show active" id="tabMision" role="tabpanel" aria-labelledby="home-tab">
+			<div class="container-fluid h-100 border">
+				<!-- <div class="row border" style="height: 20%">
+					<div class="col-md-1">
+						<div class="cropped">
+						    <img src="logouv.png" class="align-self-end mr-3" id="blancoReferencia" style="max-height:110%; max-width:110%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+					    </div>
+					</div>
+					<div class="col-md-5 mt-4">
+						<p class="text-center font-weight-bold"">SISTEMA DE GESTIÓN DE VUELO E INFORMACIÓN DE UN CUADRICÓPTERO PARA EL MAPEO DE CONTENIDO DE NITRÓGENO DE UN CULTIVO USANDO MICROSENSORES ESPECTRALES</p>
+
+					</div>
+					<div class="col-md-2 mt-3 border-right">
+						<div class="cropped">
+						    <img src="logogici.png" class="align-self-end mr-3" id="blancoReferencia" style="max-height:90%; max-width:90%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+					    </div>
+					</div>
+				</div> -->
+				<div class="row" style="min-height:40%">
+					<div class="col-md-4 border">
+						<div class="row" id= "divLogin">
+							<div class="col-md-12">
+								<div class="row-fluid">
+									<div class="row justify-content-sm-center mt-2 mb-2"><h5>Información de Usuario y Login</h5></div>
+									<div class="col-md-12 form-group mt-1" style="white-space: nowrap;">
+										<div class="col-md-12 form-group ml-n4">
+										    <label for="nombreUsuario">Nombre de Usuario</label>
+										    <input type="text" class="form-control form-control-sm mb-n2" id="nombreUsuario" placeholder="">
+									    </div>
+									    <div class="col-md-12 form-group ml-n4">
+										    <label for="password">Contraseña</label>
+										    <input type="password" name = "password" class="form-control form-control-sm mb-n2" id="password" placeholder="">
+									    </div>
+									</div>
+								</div>
+								<div class="row mt-4">
+									<div class="col-md-5"><button onclick="login()" type="button" class="btn btn-primary btn-sm w-100 mr-3" id="btnLogin">Login</button></div>
+									<div class="col-md-5"><button onclick="registro()" type="button" class="btn btn-primary btn-sm w-100 ml-3" id="btnResgistrarse">Registarse</button></div>
+								</div>
+							</div>
+						</div>
+						<div class="row d-none" id = "divLogged">
+							<p>Usted está logeado como: &nbsp;</p>
+							<p id= "usuarioLogueado"></p>
+							<div class="col-md-5"><button onclick="logOut()" type="button" class="btn btn-primary btn-sm w-100 mr-3" id="btnLogOut">Cerrar Sesión</button></div>
+							
+						</div>
+					</div>
+					<div class="col-md-5 border">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="row justify-content-sm-center mt-2 mb-2"><h5>Creación de Misión</h5></div>
+								<div class="row ml-1 mr-n1">
+									<div class="col-md-6 mt-n1">
+										<div class="row mt-1">
+											<h7>Modo de Vuelo</h7>
+										</div>
+										<div class="row mt-3">
+											<h7>Modo de Adquisición</h7>
+										</div>
+										<div class="row mt-3">
+											<h7>Elevación</h7>
+										</div>
+										<div class="row mt-3">
+											<h7>Velocidad</h7>
+										</div>
+										<div class="row mt-3">
+											<h7>Nombre de Misión</h7>
+										</div>
+									</div>
+									<div class="col-md-6 mt-n1">
+									    <div class="row">
+									    	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="modoVuelo">
+									    		<label class="btn btn-primary active">
+									    			<input type="radio" value="1" id="Auto" checked> Auto
+									    		</label>
+									    		<label class="btn btn-primary">
+									    			<input type="radio" value="2" id="Manual"> Manual
+									    		</label>
+									    	</div>
+									    </div>
+									    <div class="row mt-1">
+									    	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="modoAdquisicion">
+									    		<label class="btn btn-primary active">
+									    			<input type="radio" value="1" id="Auto" checked> Auto
+									    		</label>
+									    		<label class="btn btn-primary">
+									    			<input type="radio" value="2" id="Manual"> Manual
+									    		</label>
+									    	</div>
+									    </div>
+									    <div class="row mt-2">
+									    	<input type="text" class="form-control form-control-sm" id="elevacion" placeholder="metros">
+									    </div>
+									    <div class="row mt-2">
+									    	<input type="text" class="form-control form-control-sm" id="velocidad" placeholder="metros/s">
+									    </div>
+									    <div class="row mt-2">
+									    	<input type="text" class="form-control form-control-sm" id="nombreMisionCrear" placeholder="Caracteres Alfa-Numéricos">
+									    </div>
+									</div>
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-6">
+										<button type="button" class="btn btn-primary btn-sm w-100" id="btnCrearMision" onclick="crearMision()">Crear Misión</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 border">
+						<div class="row justify-content-sm-center mt-2 mb-2"><h5>Opciones de conexión</h5></div>
+						<div class="container justify-content-sm-center">
+							<div class="row justify-content-sm-center">
+								<div class="col-md-12">
+									<button type="button" class="btn btn-primary btn-sm w-100" id="btnConectar" onclick="conectarDron()">Conectar</button>
+								</div>
+							</div>
+							<div class="row justify-content-sm-center">
+								<div class="col-md-12">
+									<button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnDesconectar" onclick="desconectarDron()" disabled="true">Desconectar</button>
+								</div>
+							</div>
+							<div class="row justify-content-sm-center">
+								<div class="col-md-12">
+									<input type="text" class="form-control mt-2" id="statusText" placeholder="Status" readonly>  
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="tabSensores" role="tabpanel" aria-labelledby="profile-tab">
+			<div class="container-fluid border">
+				<div class="row" style="height:100%">
+					<div class="col-md-2 mr-2">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="text-nowrap ml-n3" style="width: 8rem;">
+                                    <h5>Información de Sensores</h5>
+                                </div>
+								<div class="row ml-1 mr-n1 justify-content-sm-left">
+									<div class="col-md-12">
+										<h6>Sensores de tierra</h6>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorTierraVIS">Número de serie VIS</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorTierraVIS" placeholder="">
+											</div>
+										</div>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorTierraNIR">Número de serie NIR</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorTierraNIR" placeholder="">
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row ml-1 mr-n1 justify-content-sm-left">
+									<div class="col-md-12">
+										<h6>Sensores de vuelo</h6>
+										<div class="row">
+											<div class="form-group">
+												<label for="sensorVueloVIS">Número de serie VIS</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorVueloVIS" placeholder="">
+											</div>
+										</div>
+										<div class="row mb-2">
+											<div class="form-group">
+												<label for="sensorVueloNIR">Número de serie NIR</label>
+												<input type="text" class="form-control form-control-sm mb-n3" id="sensorVueloNIR" placeholder="">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<br>
+								<div class="container">
+									<div class="row">
+										<div class="text-nowrap ml-n3" style="width: 8rem;">
+                                            <h5>Parametros de Captura</h5>
+                                        </div>
+									</div>
+									<div class="row mt-1">
+										<div class="form-group">
+											<label for="tiempoIntegracion">Tiempo de integración</label>
+											<input type="text" class="form-control form-control-sm mb-n3" id="tiempoIntegracion" placeholder="(Milisegundos)">
+										</div>
+										<div class="form-group">
+											<label for="numeroCapturas">Numero de capturas</label>
+											<input type="text" class="form-control form-control-sm mb-n2" id="numeroCapturas" placeholder="">
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<div class="row justify-content-sm-center">
+												<button type="button" class="btn btn-primary btn-sm w-100 mr-5" id="btnCalibrar" onclick="calibrarSensores()">Calibrar</button>
+											</div>
+											
+										</div>
+										
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-5 border">
+						<div class="row justify-content-sm-center">
+							<h5>Calibración del Blanco de Referencia</h5><br>
+							<div class="col-md-1"></div>
+							<div class="col-md-10"><P>Antes de iniciar la calibración asegúrese de tener el objetivo firme y estable frente al sensor</P></div>
+							
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+                                <div class="row justify-content-sm-left">
+                                	<div class="col-md-4">
+                                    	<button type="button" class="btn btn-primary btn-sm w-100" data-toggle="modal" id="btnCalibrarBlanco"  data-target="#modalCalibrarBlanco">Capturar B. Referencia</button>
+										<div class="modal fade" id="modalCalibrarBlanco" tabindex="-1" role="dialog" aria-labelledby="modalCalibrarBlancoLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalCalibrarBlancoLabel">Confirmación de Captura</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>Para realizar la captura del blanco de referencia, ubique el objetivo blanco bajo el sensor, cuando esté listo presione el botón "Capturar Ahora"</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="capturarBlanco()">Capturar Ahora</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+                                	</div>
+                                	<div class="col-md-3">
+					    		        <button type="button" class="btn btn-primary btn-sm w-100" data-toggle="modal" id="btnGuardarBlanco" data-target="#modalGuardarBlanco" disabled="true">Guardar</button>
+					    		        <!-- modal -->
+					    		        <div class="modal fade" id="modalGuardarBlanco" tabindex="-1" role="dialog" aria-labelledby="modalGuardarBlancoLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalGuardarBlancoLabel">Confirmación de Guardado</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>¿Desea almacenar el blanco de referencia capturado?</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="guardarBlanco()">Guardar Ahora</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+					    	        </div>
+					    	        <div class="col-md-3">
+						    	        <button type="button" class="btn btn-primary btn-sm w-100" id="btnVolverBlanco" data-toggle="modal" data-target="#modalVolverATomar"disabled="true" >Volver a Tomar</button>
+						    	        <!-- modal -->
+					    		        <div class="modal fade" id="modalVolverATomar" tabindex="-1" role="dialog" aria-labelledby="modalVolverATomarLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalVolverATomarLabel">Confirmación de Guardado</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>¿Desea volver a capturar el blanco de referencia?</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="capturarBlanco()">Volver a Capturar</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+						            </div>
+					            </div>
+                            </div>
+						</div>
+						<div class="row">
+							<div class="cropped">
+						        <img src="blanco.png" class="align-self-end mr-3" id="blancoReferencia" style="max-height:100%; max-width:100%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+					        </div>
+						</div>
+					</div>
+					<div class="col-md-5 border mr-n2">
+						<div class="row justify-content-sm-center">
+							<h5>Calibración del Dark</h5><br>
+							<div class="col-md-1"></div>
+							<div class="col-md-10"><P>Antes de iniciar la calibración asegúrese de tener el objetivo firme y estable frente al sensor</P></div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+                                <div class="row justify-content-sm-left">
+                                	<div class="col-md-4">
+                                		<button type="button" class="btn btn-primary btn-sm w-100" id="btnCalibrarNegro" data-toggle="modal"  data-target="#modalCalibrarNegro">Capturar Dark</button>
+
+                                		<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+										  Launch demo modal
+										</button> -->
+
+										<!-- Modal -->
+										<div class="modal fade" id="modalCalibrarNegro" tabindex="-1" role="dialog" aria-labelledby="modalCalibrarNegroLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalCalibrarNegroLabel">Confirmación de Captura</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>Para realizar la captura del Dark, ubique el objetivo blanco bajo el sensor, cuando esté listo presione el botón "Capturar Ahora"</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="capturarNegro()">Capturar Ahora</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+                                	</div>
+
+						            <div class="col-md-3">
+					    		        <button type="button" class="btn btn-primary btn-sm w-100" id="btnGuardarNegro" data-toggle="modal"  data-target="#modalGuardarNegro" disabled="true">Guardar</button>
+					    		        <!-- modal -->
+					    		        <div class="modal fade" id="modalGuardarNegro" tabindex="-1" role="dialog" aria-labelledby="modalGuardarNegroLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalGuardarNegroLabel">Confirmación de Guardado</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>¿Desea guardar el espectro Capturado?</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="guardarNegro()">Guardar Negro Referencia</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+					    	        </div>
+						            <div class="col-md-4">
+						    	        <button type="button" class="btn btn-primary btn-sm w-100" id="btnVolverNegro" disabled="true" data-toggle="modal"  data-target="#modalVolverATomarNegro">Volver a Tomar</button>
+						    	        <!-- modal -->
+					    		        <div class="modal fade" id="modalVolverATomarNegro" tabindex="-1" role="dialog" aria-labelledby="modalVolverATomarNegroLabel" aria-hidden="true">
+										  <div class="modal-dialog" role="document">
+										    <div class="modal-content">
+										      <div class="modal-header">
+										        <h5 class="modal-title" id="modalVolverATomarNegroLabel">Confirmación de Guardado</h5>
+										        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										          <span aria-hidden="true">&times;</span>
+										        </button>
+										      </div>
+										      <div class="modal-body">
+										      	<p>¿Desea volver a capturar el negro de referencia?</p>
+										      </div>
+										      <div class="modal-footer">
+										        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+										        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="capturarNegro()">Volver a Capturar</button>
+										      </div>
+										    </div>
+										  </div>
+										</div>
+						            </div>
+					            </div>
+                            </div>
+						</div>
+						<div class="row justify-content-sm-center">
+							<div class="cropped mt-1">
+						        <img src="Figure_1.png" class="align-self-center mr-3" id="dark" style="max-height:100%; max-width:100%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+					        </div>
+						</div>
+					</div>
+					
+			    </div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="tabControl" role="tabpanel" aria-labelledby="profile-tab1">
+			<div class="container-fluid h-100 border">
+				<!-- <div class="row" style="min-height:30%">
+					<div class="col-md-3 border">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="row">
+									<h5>Información de la misión</h5>
+									<div class="col-md-12 form-group">
+										<label for="nombremision">Nombre de la misión</label>
+										<input type="text" class="form-control form-control-sm mb-n2" id="nombremision" placeholder="Ingrese el nombre de la misión">
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnNuevaMision">Nueva Misión</button></div>
+									<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnPausarMision">Pausar Misión</button></div>
+								</div>
+								<div class="row mt-1">
+									<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnReanudarMision">Reanudar Misión</button></div>
+									<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnDetenerMision">Detener Misión</button></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					
+					<div class="col-md-2 border">
+						<h5>Opciones de conexión</h5>
+						<div class="container">
+							<div class="row">
+								<button type="button" class="btn btn-primary btn-sm w-100" id="btnConectar">Conectar</button>
+							</div>
+							<div class="row">
+								<button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnDesconectar">Desconectar</button>
+							</div>
+							<div class="row">
+								<input type="text" class="form-control mt-2" id="statusText" placeholder="Status" readonly>  
+							</div>
+						</div>
+					</div>
+				</div> -->
+				<div class="row" style="height:1%"></div>
+				<div class="row" style="height:90%">
+					<div class="col-md-2 border">
+						<h5>Waypoints</h5>
+						<textarea class="form-control" id="waypointsTextArea" rows="20"></textarea>
+						<!-- <div class="form-group row mt-1">
+							<label for="elevacion" class="col-sm-5 col-form-label">Elevacion</label>
+							<div class="col-sm-7">
+								<input type="text" class="form-control" id="elevacion">
+							</div>
+						</div> -->
+						
+						<div class="row">
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnGuardarWaypoints" onclick= "guardarWaypoints()">Guardar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100" id="btnActualizarWaypoints" onclick="guardarWaypoints()">Actualizar</button></div>
+						</div>
+						
+						<div class="row mt-1">
+							<div class="col-md-12"><button id="deleteWaypointButton" class="btn btn-primary btn-sm w-100">Borrar el ultimo waypoint</button></div>
+						</div>
+					</div>
+					
+					<div class="col-md-8 border">
+						<div class="row" style="height:98%">
+							<div class="col-md-12">
+								<div id="mapid"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-md-2 border">
+						<div class="mb-n2"><h5>Telemetría</h5>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Pitch</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelPitch"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Yaw</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelYaw"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Roll</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelRoll"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Altitud</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelAltitud"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Velocidad</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelVelocidad"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Batería</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelBateria"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Irradancia</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelIrradancia"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Latitud</label>
+								</div>
+								<div class="col-md-6 mt-n2">
+									<label id="labelLatitud"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Longitud</label>
+								</div>
+								<div class="col-md-6 mt-n2	">
+									<label id="labelLongitud"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Wp Actual</label>
+								</div>
+								<div class="col-md-6 mt-n2	mb-2">
+									<label id="LabelWpActual"></label>
+								</div>
+							</div>
+							<div class="row" style="height:3%">
+								<div class="col-md-6 mt-n2">
+									<label>Estado Wp</label>
+								</div>
+								<div class="col-md-6 mt-n2	mb-2">
+									<label id="LabelEstadoWp"></label>
+								</div>
+							</div>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-md-12 mt">
+								<h5>Control de Adquisición</h5>
+								<!-- <label>Modo de adquisición</label> -->
+								<div class="form-group">
+									<label class="mb-1 mt-2" for="numeroEspectros">Número de espectros</label>
+									<input type="text" class="form-control form-control-sm mb-n2" id="numeroEspectros" placeholder="">
+								</div>
+									
+								<div class="form-group">
+									<label class="mb-1" for="intervaloCapturas">Intervalo de capturas</label>
+									<input type="text" class="form-control form-control-sm mb-n2" id="intervaloCapturas" placeholder="">
+								</div>
+								
+								<div class="row">
+									<div class="col-md">
+										<button id="btnCapturar" class="btn btn-primary btn-sm w-100" onclick="capturarVuelo()">Capturar</button>
+									</div>
+								</div>
+							</div>
+							<!-- <div class="col-md-5">
+								<button id="btnModoManual" class="btn btn-primary btn-sm w-100">Manual</button>
+							</div>
+							<div class="col-md-6">
+								<button id="btnModoManual" class="btn btn-primary btn-sm w-100">Auto</button>
+							</div> -->
+						</div>
+						
+						<div class="row mt-1 border">
+							<div class="col-md-12"><h5>Control Dron</h5></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnArmar">Armar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnDesarmar">Desarmar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnVolver">Volver</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnAterrizar">Aterrizar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" data-toggle="button" aria-pressed="false" id="btnHover">Hover</button></div>
+						</div>
+						<div class="row mt-1 border">
+							<div class="col-md-12"><h5>Control de Misión</h5></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnIniciar">Iniciar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnPausar">Pausar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnReanudar">Reanudar</button></div>
+							<div class="col-md-6"><button type="button" class="btn btn-primary btn-sm w-100 mt-1" id="btnDetener">Detener</button></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="tabData" role="tabpanel" aria-labelledby="profile-tab2">
+			<div class="container-fluid border">
+				<div class="row justify-content-sm-left" style="min-height:100%">
+					<div class="col-md-12">
+						<div class="row" style="max-height:15%">
+							<h5>Visualización y Descarga de Información</h5>
+						</div>
+						<div class="row">
+							<div class="col-md-3 border">
+								<div class="row">
+									<div class="col-md-12 form-group">
+										<div class="row">
+											<div class="col-md-12">
+												<button type="button" class="btn btn-primary btn-sm btn-block" id="btnDescargarInformacion" onclick="descargarInfo()">Descargar Información de Misión</button>
+											</div>
+										</div>
+										<label for="misionesGuardadas"><h5>Misiones Guardadas</h5></label>
+										<select multiple class="form-control" id="misionesGuardadas">
+	 										<option>Misión 1</option>
+	  										<option>Misión 2</option>
+	  										<option>Misión 3</option>
+	  										<option>Misión 4</option>
+	  										<option>Misión 5</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6">
+										<button type="button" class="btn btn-primary btn-sm w-100" id="btnSeleccionarMision" disabled="true">Seleccionar</button>
+									</div>
+									<div class="col-md-6">
+										<button type="button" class="btn btn-primary btn-sm w-100" id="btnBorrarMision" disabled="true">Borrar</button>
+									</div>
+									<!-- <div class="col-md-6">
+										<div class="btn-primary btn-sm w-100" id="btnSeleccionarMision" disabled="true">Seleccionar</div>
+									</div>
+									<div class="col-md-6">
+										<div class="btn-primary btn-sm w-100" id="btnBorrarMision" disabled="true">Borrar</div>
+									</div> -->
+								</div>
+								<div class="row">
+									<div class="col-md-12 form-group mt-3">
+										<label for="nombreMisionGuardada"><h5>Espectros Almacenados</h5></label>
+										<div class="row" style="height:3%">
+											<div class="col-md-6 mt-n2">
+												<label><h8>Nombre de Misión:</h8></label>
+											</div>
+											<div class="col-md-6 mt-n2">
+												<label id="nombreMisionGuardada"></label>
+											</div>
+										</div>
+										<select multiple class="form-control" id="waypointsMisionGuardada">
+	 										<option>Waypoint 1</option>
+	  										<option>Waypoint 2</option>
+		  									<option>Waypoint 3</option>
+		  									<option>Waypoint 4</option>
+		  									<option>Waypoint 5</option>
+		  									<option>Waypoint 6</option>
+		  									<option>Waypoint 7</option>
+		  									<option>Waypoint 8</option>
+		  									<option>Waypoint 9</option>
+		  									<option>Waypoint 10</option>
+		  									<option>Waypoint 11</option>
+		  									<option>Waypoint 12</option>
+		  									<option>Waypoint 13</option>
+		  									<option>Waypoint 14</option>
+		  									<option>Waypoint 15</option>
+		  									<option>Waypoint 16</option>
+		  									<option>Waypoint 17</option>
+		  									<option>Waypoint 18</option>
+		  									<option>Waypoint 19</option>
+		  									<option>Waypoint 20</option>
+										</select>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-md-6">
+										<button type="button" class="btn btn-primary btn-sm w-100" id="btnVerEspectro" disabled="true">Ver Espectro</button>
+									</div>
+									<div class="col-md-6">
+										<button type="button" class="btn btn-primary btn-sm w-100" id="btnGuardarEspectro" disabled="true">Guardar Espectro</button>
+									</div>
+									<div class="col-md-8 mt-1 ml-5">
+										<button type="button" class="btn btn-primary btn-sm btn-block" id="btnGuardarTodos" disabled="true">Guardar Todos</button>
+										<!-- <div class="btn-primary btn-sm btn-block" id="btnguardartodos">Guardar Todos</div> -->
+									</div>
+								</div>
+							</div>
+							<div class="col-md-9 border ml-n3">
+								<div class="row justify-content-sm-center" style="max-height:5%">
+									<h5>Espectro Electromagnético</h5>
+								</div>
+								<div class="media mt-n2">
+									<img src="Figure_2.png" class="align-self-end mr-3" id="espectro" style="max-height:100%; max-width:100%; overflow: hidden" alt="No se pudo cargar la imagen del espectro.">
+								</div>
+							</div>
+						</div>
+						
+						
+					</div>
+					
+					
+					<div class="col-md-12 border">
+						
+					</div>
+
+			</div>
+			</div>
+		</div>
+		<div class="tab-pane fade" id="tabAyuda" role="tabpanel" aria-labelledby="profile-tab3">
+			asdvbgh
+		</div>
+	</div>
+	</body>
+	<script src="jquery-3.4.1.js"></script>
+	<script>
+		// $('#tabControl a').on('click', function (e) {
+		// 	e.preventDefault()
+		// 	$(this).tab('show')
+		//     mymap.invalidateSize();
+		// })
+
+		document.getElementById("profile-tab1").addEventListener("click", function () {
+			mapid.style.display = "block";
+		    mymap.invalidateSize();
+		});
+		
+		// $('a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
+		// 	var target = $(e.target).attr("href") // activated tab
+		// 	console.log(target)
+		// 	alert(target);
+		// });
+		var miStorage = window.localStorage;
+	    var mymap = L.map('mapid').setView([3.373272,-76.529766], 20);	
+		//Llamar opciones del mapa para que se muestre (Regularmente no se toca)
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+				maxZoom: 22,
+				id: 'mapbox.streets',
+				accessToken: 'pk.eyJ1IjoiY2FtaWxvcXVpbnRlcm9wIiwiYSI6ImNqeWo0M2NodzAxODQzbm84Z2UzamJxZ2EifQ.D_RjbBtVT9RX-4B7Ts8rYA'
+		}).addTo(mymap);
+			
+		// $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		// 	mymap.invalidateSize()
+		//   e.target // newly activated tab
+		//   e.relatedTarget // previous active tab
+		// })
+		
+		var waypoints = [];
+		var lines = [];
+		var anterior = null;
+		var drone = null;
+		var dronConectado = false;
+
+		function onMapClick(e) {
+			waypoints.push({"marker":L.marker(e.latlng).addTo(mymap), "reached":false});	
+			$("#waypointsTextArea").append(e.latlng.lat+","+e.latlng.lng+"\n"); //referenciar objeto html
+
+			drawLines();
+			anterior = e.latlng;
+			console.log(e.latlng);
+		}
+		
+		function drawLines(){
+			removeLines();
+			anterior = null;
+			for(i in waypoints){
+				var pos = 	[waypoints[i].marker._latlng.lat, waypoints[i].marker._latlng.lng];
+				if(anterior != null){
+					var dots = [anterior, pos];
+					if(waypoints[i].reached){
+						line = L.polyline(dots, {color: 'red'}).addTo(mymap);
+					}
+					else{
+						line = L.polyline(dots).addTo(mymap);
+					}
+					lines.push(line);
+				}
+				anterior = pos;
+			}
+		}
+		
+		function removeLines(){
+			//console.log(lines);
+			for(i in lines){
+				lines[i].remove();
+			}
+			lines = [];
+		}
+		mymap.on('click', onMapClick);
+		
+		$( document ).ready(function() {
+			
+			
+			$( "#deleteWaypointButton" ).mouseup(function() {
+				var last = waypoints.pop().marker;
+				if(last!=null){
+					last.remove();
+					drawLines();
+				}
+			});
+			
+			drone = L.marker([3.373272,-76.529766], {icon: myIcon}).addTo(mymap);
+			setInterval(function(){ simulatedMovementTowardsMarkers(drone); }, 100);
+
+
+			if(miStorage.getItem("usuario") != null){
+				$("#divLogin").addClass("d-none");
+				$("#divLogged").removeClass("d-none");
+				$("#usuarioLogueado").html(miStorage.getItem("usuario"));
+			}
+
+			setInterval(function(){obtenerTelemetria();}, 8000);
+		});
+		var myIcon = L.icon({
+			iconUrl: 'drone.png',
+			iconSize: [32, 32]
+		});
+		function getDroneLatLng(){
+		}
+		function simulatedMovementTowardsMarkers(){
+			for(i in waypoints){
+			 	
+				if(!waypoints[i].reached){
+					var markerLat = 	waypoints[i].marker._latlng.lat;
+					var markerLng = 	waypoints[i].marker._latlng.lng;
+					var droneLat  =     drone._latlng.lat;
+					var droneLng  =     drone._latlng.lng;
+					
+					var latDif = markerLat - droneLat;
+					var lngDif = markerLng - droneLng;
+			
+					
+					if(!droneReachedPoint(latDif, lngDif)){
+					
+						if(Math.abs(latDif) > 0.000002){
+							if(latDif > 0){
+								droneLat = droneLat + 0.000001;
+							}
+							else{
+								droneLat = droneLat - 0.000001;
+							}
+						}
+						
+						if(Math.abs(lngDif) > 0.000002){
+							if(lngDif > 0){
+								droneLng = droneLng + 0.000001;
+							}
+							else{
+								droneLng = droneLng - 0.000001;
+							}
+						}
+						
+						////////////////////////////////////////////////////////
+						//Esta función mueve el dron en el mapa de posicion/////
+						var actualLatLng = drone.getLatLng();
+						actualLatLng.lat = droneLat; 
+						actualLatLng.lng = droneLng;
+						
+						drone.setLatLng(actualLatLng);
+						////////////////////////////////////////////////////////
+						////////////////////////////////////////////////////////
+					}
+					else{
+						waypoints[i].reached = true;
+						drawLines();
+					}
+					
+					break;
+				}
+			}
+		}
+		function droneReachedPoint(latDif, lngDif){		
+			if(Math.abs(latDif) > 0.000002){
+				return false;
+			}
+			
+			if(Math.abs(lngDif) > 0.000002){
+				return false;
+			}
+			
+			return true;	
+		}
+		function enviarAltitudVelocidad(){
+			var elevacion = $('#elevacion').val();
+			var velocidad = $('#velocidad').val();
+			$.ajax({
+				url: 'http://127.0.0.1:5000/enviarAltitudVelocidad/'+elevacion + '/' + velocidad,
+				type: "POST",
+				dataType: "json",
+				async: true,
+				success: function(result){
+					var info = result;
+					console.log('El resultado fue:'+ result.status);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+
+			})
+		}
+		function login(){
+			var nombreUsuario = $('#nombreUsuario').val();
+			var password = $('#password').val();
+			var errorBd;
+			// console.log(nombreUsuario);
+
+			if($.trim(nombreUsuario)=="" || $.trim(password)==""){
+				alert("El nombre de usuario o contraseña no pueden estar vacíos");
+			}
+			else{
+				$.ajax({
+					url: 'http://127.0.0.1:5000/login',
+					type: "POST",
+					dataType: "json",
+					contentType: 'application/json;charset=UTF-8',
+					data: JSON.stringify({"nombreUsuario": nombreUsuario, "password": password, "errorBd": errorBd}),
+					async: true,
+					success: function(result){
+						var info = result;
+						if(info.errorBd[0] == "T"){
+							alert("El usuario no se encuentra resgistrado en la base de datos.");
+						}
+						else {
+							alert("El usuario se ingresó con éxito");
+							miStorage.setItem("usuario", nombreUsuario);
+							$("#divLogin").addClass("d-none");
+							$("#divLogged").removeClass("d-none");
+							$("#btnCrearMision").prop("disabled", false);
+						}						
+						console.log('El resultado de login:'+ info);
+
+					},
+					error: function (request, status, error){
+						console.log(request);
+						console.log(status);
+						console.log(error);
+					}
+
+				});
+			}
+		}
+		function logOut(){
+			miStorage.removeItem("usuario");
+			$("#divLogged").addClass("d-none");
+			$("#divLogin").removeClass("d-none");
+		}
+		function registro(){
+			var nombreUsuario = $('#nombreUsuario').val();
+			var password = $('#password').val();
+			var errorBd;
+			// console.log(nombreUsuario);
+
+			if($.trim(nombreUsuario)=="" || $.trim(password)==""){
+				alert("El nombre de usuario o contraseña no pueden estar vacíos");
+			}
+			else{
+				$.ajax({
+					url: 'http://127.0.0.1:5000/registro',
+					type: "POST",
+					dataType: "json",
+					contentType: 'application/json;charset=UTF-8',
+					data: JSON.stringify({"nombreUsuario": nombreUsuario, "password": password, "errorBd": errorBd}),
+					async: true,
+					success: function(result){
+						var info = result;
+						if(info.errorBd[0] == "T"){
+							alert("Ocurrió un error al registrar el usuario en la base de datos, el usuario puede ser inválido o estar repetido.")
+						}
+						else {
+							alert("El usuario se registró con éxito")
+						}						
+						console.log('El resultado de registro:'+ info);
+
+					},
+					error: function (request, status, error){
+						console.log(request);
+						console.log(status);
+						console.log(error);
+					}
+
+				});
+			}
+			// regError();
+		}
+		function crearMision(){
+			if(miStorage.getItem("usuario") != null){
+				$("#profile-tab").removeClass("disabled");
+				var nombreUsuario = miStorage.getItem("usuario")
+				var modoVuelo = $("#modoVuelo label.active input").val();
+				var modoAdquisicion = $("#modoAdquisicion label.active input").val();
+				var elevacion = $("#elevacion").val();
+				var velocidad = $("#velocidad").val();
+				var nombreMisionCrear = $("#nombreMisionCrear").val();
+				var errorBd;
+				// alert(modoVuelo + modoAdquisicion)
+				
+				if($.trim(elevacion)=="" || $.trim(velocidad)=="" || $.trim(nombreMisionCrear)==""){
+					alert("El nombre de usuario o contraseña no pueden estar vacíos");
+				}
+				else if(parseFloat(elevacion) > 10 || parseFloat(velocidad < 0.5) || parseFloat(velocidad > 10)){
+					alert("Los valores de Elevación o Velocidad no son compatibles con el sistema")
+				}
+
+				else{
+					$.ajax({
+						url: 'http://127.0.0.1:5000/crearMision',
+						type: "POST",
+						dataType: "json",
+						contentType: 'application/json;charset=UTF-8',
+						data: JSON.stringify({"nombreUsuario": nombreUsuario, "nombreMisionCrear": nombreMisionCrear, "elevacion": elevacion, "velocidad": velocidad, "modoVuelo": modoVuelo, "modoAdquisicion": modoAdquisicion, "errorBd": errorBd}),
+						async: true,
+						success: function(result){
+							var info = result;
+							if(info.errorBd[0] == "T"){
+							alert("Ocurrió un error al registrar la misión en la base de datos, ingrese un nombre de misión diferente.")
+							}
+							else {
+								alert("Misión creada con étsito")
+								miStorage.setItem("nombreMisionCrear", nombreMisionCrear);
+								$("#btnCrearMision").prop("disabled", true);
+							}						
+							console.log('El resultado de crearmision:'+ info);
+
+
+						},
+						error: function (request, status, error){
+							console.log(request);
+							console.log(status);
+							console.log(error);
+						}
+
+					});
+				}
+			}
+		}
+		function conectarDron(){
+			if(miStorage.getItem("usuario") != null){
+				if(miStorage.getItem("nombreMisionCrear") != null){
+					$("#btnConectar").prop("disabled", true);
+					$("#btnDesconectar").prop("disabled", true);
+					var nombreUsuario = miStorage.getItem("usuario")
+					var nombreMisionCrear = miStorage.getItem("nombreMisionCrear")
+					var conectarDron = true;
+					// var password = $('#password').val();
+					var errorDrone;
+					// console.log(nombreUsuario);
+					$("#statusText").attr("placeholder", "Conectando");
+
+					$.ajax({
+						url: 'http://127.0.0.1:5000/conectarDron',
+						type: "POST",
+						dataType: "json",
+						contentType: 'application/json;charset=UTF-8',
+						data: JSON.stringify({"conectarDron": conectarDron}),
+						async: true,
+						success: function(result){
+							var info = result;
+							if(info.errorDrone[0] == "T"){
+								alert("Ocurrió un error durante la conexión con el dron, revise el estado de la batería y de los módulos de comunicación.")
+								$("#statusText").attr("placeholder", "Desconectado");
+							}
+							else {
+								dronConectado = true;
+
+								$("#statusText").attr("placeholder", "Conectado");
+								$("#btnDesconectar").prop("disabled", false);
+							}						
+							console.log('El resultado de conectarDron:'+ info);
+							obtenerTelemetria();
+
+						},
+						error: function (request, status, error){
+							$("#btnConectar").prop("disabled", false);
+							console.log(request);
+							console.log(status);
+							console.log(error);
+						}
+
+					});
+				}
+				else{
+					alert("Primero cree una misión de vuelo")
+				}
+			}
+		}
+		function desconectarDron(){
+			$("#btnConectar").prop("disabled", true);
+			$("#btnDesconectar").prop("disabled", true);
+			var conectarDron = false;
+			// var password = $('#password').val();
+			var errorDrone;
+			// console.log(nombreUsuario);
+			$("#statusText").attr("placeholder", "Desconectando");
+
+			$.ajax({
+				url: 'http://127.0.0.1:5000/conectarDron',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"conectarDron": conectarDron, "errorDrone": errorDrone}),
+				async: true,
+				success: function(result){
+					var info = result;
+					if(info.errorDrone[0] == "T"){
+						alert("Ocurrió un error durante la conexión con el dron, revise el estado de la batería y de los módulos de comunicación.")
+					}
+					else {
+						dronConectado = false;
+						$("#statusText").attr("placeholder", "Desconectado");
+						$("#btnConectar").prop("disabled", false);
+					}						
+					console.log('El resultado de desconectarDron:'+ info);
+
+				},
+				error: function (request, status, error){
+					$("#btnDesconectar").prop("disabled", true);
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+
+			});
+			// regError();
+		}
+		function obtenerTelemetria(){
+			if(dronConectado){
+				nombreMisionCrear = miStorage.getItem("nombreMisionCrear");
+				var errorBd;
+				$.ajax({
+					url: 'http://127.0.0.1:5000/obtenerTelemetria',
+					type: "POST",
+					dataType: "json",
+					contentType: 'application/json;charset=UTF-8',
+					data: JSON.stringify({"nombreMisionCrear": nombreMisionCrear, "errorBd": errorBd}),
+					async: true,
+					success: function(result){
+						var info = result;
+						if(info.errorBd[0] == 'T'){
+							alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+						}
+						else {
+							var lat = info.lat
+							var lon = info.lon
+							var alt = info.alt
+							var pitch = info.pitch
+							var yaw = info.yaw
+							var roll = info.roll
+							var velocidadDron = info.velocidadDron
+							var bateriaDron = info.bateriaDron
+
+							$("#labelPitch").html(pitch);
+							$("#labelYaw").html(yaw);
+							$("#labelRoll").html(roll);
+							$("#labelLatitud").html(lat);
+							$("#labelLongitud").html(lon);
+							$("#labelAltitud").html(alt);
+							$("#labelVelocidad").html(velocidadDron);
+							$("#labelBateria").html(bateriaDron);
+						}			
+						console.log('El resultado de telem:'+ info);
+
+					},
+					error: function (request, status, error){
+						console.log(request);
+						console.log(status);
+						console.log(error);
+					}
+
+				});
+			}
+			
+			// regError();
+		}
+		function calibrarSensores(){
+			$("#btnCalibrar").prop("disabled", true);
+			nombreMisionCrear = miStorage.getItem("nombreMisionCrear")
+			var sensorTierraVIS = $("#sensorTierraVIS").val();
+			var sensorTierraNIR = $("#sensorTierraNIR").val();
+			var sensorVueloVIS = $("#sensorVueloVIS").val();
+			var sensorVueloNIR = $("#sensorVueloNIR").val();
+			var tiempoIntegracion = $("#tiempoIntegracion").val();
+			var numeroCapturas = $("#numeroCapturas").val();
+			var errorBd;
+			var errorCalibrarSensoresTierra;
+			var errorCalibrarSensoresVuelo;
+
+			if($.trim(sensorTierraVIS)=="" || $.trim(sensorTierraNIR)=="" || $.trim(sensorVueloVIS)=="" || $.trim(sensorVueloNIR)=="" || $.trim(tiempoIntegracion)=="" || $.trim(numeroCapturas)==""){
+					alert("Rellene todos los campos");
+				}
+				else if(parseFloat(tiempoIntegracion) < 80 || parseFloat(tiempoIntegracion < 800) || parseFloat(numeroCapturas < 1) || parseFloat(numeroCapturas > 10)){
+					alert("Los valores de Tiempo de Integración o Número de Capturas no son compatibles con el sistema")
+				}
+				else{
+					$.ajax({
+						url: 'http://127.0.0.1:5000/calibrarSensores',
+						type: "POST",
+						dataType: "json",
+						contentType: 'application/json;charset=UTF-8',
+						data: JSON.stringify({"nombreMisionCrear": nombreMisionCrear, "sensorTierraVIS": sensorTierraVIS, "sensorTierraNIR": sensorTierraNIR, "sensorVueloVIS": sensorVueloVIS, "sensorVueloNIR": sensorVueloNIR, "tiempoIntegracion": tiempoIntegracion, "numeroCapturas": numeroCapturas, "errorCalibrarSensoresVuelo": errorCalibrarSensoresVuelo,"errorCalibrarSensoresTierra": errorCalibrarSensoresTierra, "errorBd": errorBd}),
+						async: true,
+						success: function(result){
+							var info = result;
+							if(info.errorBd[0] == 'T'){
+								alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+							}
+							else if(info.errorCalibrarSensoresTierra[0] == "T"){
+								alert("Ocurrió un error durante la calibración de los sensores de TIERRA, revise los numeros de serie ingresados y la conexión.")
+							}
+							else if(info.errorCalibrarSensoresVuelo[0] == "T"){
+								alert("Ocurrió un error durante la calibración de los sensores de VUELO, revise los numeros de serie ingresados y la conexión.")
+							}
+							else {
+								alert("Sensores calibrados con éxito.")
+								miStorage.setItem("sensorTierraVIS", sensorTierraVIS);
+								miStorage.setItem("sensorTierraNIR", sensorTierraNIR);
+								miStorage.setItem("sensorVueloVIS", sensorVueloVIS);
+								miStorage.setItem("sensorVueloNIR", sensorVueloNIR);
+								miStorage.setItem("tiempoIntegracion", tiempoIntegracion);
+								miStorage.setItem("numeroCapturas", numeroCapturas);
+							}						
+							console.log('El resultado de calibrar:'+ info);
+							$("#btnCalibrar").prop("disabled", false);
+
+						},
+						error: function (request, status, error){
+							$("#btnCalibrar").prop("disabled", false);
+							console.log(request);
+							console.log(status);
+							console.log(error);
+						}
+					});
+				}
+
+			
+			// regError();
+		}
+
+		function capturarBlanco(){
+			var errorBd;
+			var errorCapturaB;
+			var espectroBlanco;
+			$.ajax({
+				url: 'http://127.0.0.1:5000/capturarBlanco',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"espectroBlanco": espectroBlanco,"errorCapturaB": errorCapturaB, "errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					console.log(info.espectroBlanco)
+					var image = new Image();
+					src = 'data:image/png;base64,'+info.espectroBlanco;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else if(info.errorCapturaB[0] == "T"){
+						alert("Ocurrió un error durante la captura de los sensores de TIERRA, revise la conexión.")
+					}
+					else {
+						$("#blancoReferencia").attr("src", src);
+						alert("Captura Exitosa.")
+						$("#btnGuardarBlanco").prop("disabled", false);
+						$("#btnVolverBlanco").prop("disabled", false);
+					}						
+					console.log('El resultado de capturarB:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			// regError();
+		}
+
+		function capturarNegro(){
+			var errorBd;
+			var errorCapturaN;
+			var espectroNegro;
+			$.ajax({
+				url: 'http://127.0.0.1:5000/capturarNegro',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"espectroNegro": espectroNegro,"errorCapturaN": errorCapturaN, "errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					var image = new Image();
+					src = 'data:image/png;base64,'+info.espectroNegro;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else if(info.errorCapturaN[0] == "T"){
+						alert("Ocurrió un error durante la captura de los sensores de TIERRA, revise la conexión.")
+					}
+					else {
+						$("#dark").attr("src", src);
+						alert("Captura Exitosa.")
+						$("#btnGuardarNegro").prop("disabled", false);
+						$("#btnVolverNegro").prop("disabled", false);
+					}						
+					console.log('El resultado de capturarB:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			// regError();
+		}
+		function guardarBlanco(){
+			// sensorTierraVIS = miStorage.getItem("sensorTierraVIS")
+			// sensorTierraNIR = miStorage.getItem("sensorTierraNIR")
+			var errorBd;
+			$.ajax({
+				url: 'http://127.0.0.1:5000/guardarBlanco',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else {
+						alert("Espectro de referencia Guardado.")
+						$("#btnGuardarBlanco").prop("disabled", true);
+						$("#btnVolverBlanco").prop("disabled", true);
+					}						
+					console.log('El resultado de guardarBlanco:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+		}
+		function guardarNegro(){
+			// sensorTierraVIS = miStorage.getItem("sensorTierraVIS")
+			// sensorTierraNIR = miStorage.getItem("sensorTierraNIR")
+			var errorBd;
+			$.ajax({
+				url: 'http://127.0.0.1:5000/guardarNegro',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else {
+						alert("Espectro de referencia Guardado.")
+						$("#btnGuardarNegro").prop("disabled", true);
+						$("#btnVolverNegro").prop("disabled", true);
+					}						
+					console.log('El resultado de guardarNegro:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+		}
+		function guardarWaypoints(){
+			nombreMisionCrear = "tpp"//miStorage.getItem("nombreMisionCrear")
+			var waypoints = $.trim($("#waypointsTextArea").val());
+			var errorBd;
+			$.ajax({
+				url: 'http://127.0.0.1:5000/guardarWaypoints',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"waypoints": waypoints, "nombreMisionCrear": nombreMisionCrear, "errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else {
+						alert("Waypoint Guardados.")
+					}						
+					console.log('El resultado de guardarWaypoints:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+		}
+		function capturarVuelo(){
+			var errorBd;
+			var errorCapturaB;
+			var espectroVuelo;
+			var numeroCapturasAsincronas = $("#numeroEspectros").val();
+			var intervaloCapturasAsincronas = $("#intervaloCapturas").val();
+			$.ajax({
+				url: 'http://127.0.0.1:5000/capturarVuelo',
+				type: "POST",
+				dataType: "json",
+				contentType: 'application/json;charset=UTF-8',
+				data: JSON.stringify({"numeroCapturasAsincronas": numeroCapturasAsincronas, "intervaloCapturasAsincronas": intervaloCapturasAsincronas, "errorCapturaB": errorCapturaB, "errorBd": errorBd}),
+				async: true,
+				success: function(result){
+					var info = result;
+					// var image = new Image();
+					// src = 'data:image/png;base64,'+info.espectroVuelo;
+					if(info.errorBd[0] == 'T'){
+						alert("Ocurrió un error en la conexión con la base de datos, intente nuevamente.")
+					}
+					else if(info.errorCapturaB[0] == "T"){
+						alert("Ocurrió un error durante la captura de los sensores de VUELO, revise la conexión.")
+					}
+					else {
+						// $("#blancoReferencia").attr("src", src);
+						alert("Captura Exitosa.")
+						// $("#btnGuardarBlanco").prop("disabled", false);
+						// $("#btnVolverBlanco").prop("disabled", false);
+					}						
+					console.log('El resultado de capturarV:'+result);
+
+				},
+				error: function (request, status, error){
+					console.log(request);
+					console.log(status);
+					console.log(error);
+				}
+			});
+			// regError();
+		}
+	</script>
+</html>
