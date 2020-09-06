@@ -81,7 +81,7 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
             print("capturando blanco")
             start_time_A = time.time()
             # x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/white10.txt"
-            x = "D:/Tesis/Api/Flask/testy/cult2/white%s.txt" %(counter)
+            x = "/testy/cult2/white%s.txt" %(counter)
             with open(x, 'r') as f:
                 intensitiesFlask = f.read()
             # print(intensitiesFlask)
@@ -102,7 +102,7 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
         elif aux == "N":
             print("capturando neg")
             start_time_A = time.time()
-            x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/dark0.txt"
+            x = "/testy/cult2/dark0.txt"
             with open(x, 'r') as f:
                 intensitiesFlask = f.read()
             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
@@ -129,38 +129,38 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
         print("error captura/calibracion")
         raise errorCalibrarSensoresTierra
     return intensitiesFlask #+sensorTierraNIRl+tiempoIntegracionl+numeroCapturasl+success
-@app.route('/sensoresVuelo/<sensorVueloVIS>/<sensorVueloNIR>/<tiempoIntegracion>/<numeroCapturas>/<aux>', methods=['GET'])                                     #Añade el recurso
-def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCapturas, aux):
-    try:
-        if aux == "C":
-            print("capturando Vuelo")
-            start_time_A = time.time()
-            x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/2mt0.txt"
-            with open(x, 'r') as f:
-                intensitiesFlask = f.read()
-            # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
-            # #sts.runInParallel(read_VIS)  # SINGLE
-            # if queueTierra.full():  # If both the NIR and VIS spectra have been acquired successfully
-            #     # print(queue.qsize()) # The queue size should be 2
-            #     wavelengths_NIR, intensities_NIR, wavelengths_VIS, intensities_VIS = sts.assign_spectra(queue, init_wl_NIR, init_wl_VIS)  # SINGLE
-            # else:
-            #     print("Queue not full")
-            end_time_A = time.time()
-            duration = end_time_A - start_time_A
-            print("Acquisition for {} seconds".format(duration))
-            duration = str(duration)
-            success = "Success"
-            pass
-        else:
-            intensitiesFlask = ""
-            # a, b, c = calibrarSensores(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCapturas)
-            pass
-        pass
-    except Exception as errorCalibrarSensoresTierra:
-        print("error captura/calibracion")
-        raise errorCalibrarSensoresTierra
-    return intensitiesFlask 
-    #+sensorTierraNIRl+tiempoIntegracionl+numeroCapturasl+success
+# @app.route('/sensoresVuelo/<sensorVueloVIS>/<sensorVueloNIR>/<tiempoIntegracion>/<numeroCapturas>/<aux>', methods=['GET'])                                     #Añade el recurso
+# def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCapturas, aux):
+#     try:
+#         if aux == "C":
+#             print("capturando Vuelo")
+#             start_time_A = time.time()
+#             x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/2mt0.txt"
+#             with open(x, 'r') as f:
+#                 intensitiesFlask = f.read()
+#             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
+#             # #sts.runInParallel(read_VIS)  # SINGLE
+#             # if queueTierra.full():  # If both the NIR and VIS spectra have been acquired successfully
+#             #     # print(queue.qsize()) # The queue size should be 2
+#             #     wavelengths_NIR, intensities_NIR, wavelengths_VIS, intensities_VIS = sts.assign_spectra(queue, init_wl_NIR, init_wl_VIS)  # SINGLE
+#             # else:
+#             #     print("Queue not full")
+#             end_time_A = time.time()
+#             duration = end_time_A - start_time_A
+#             print("Acquisition for {} seconds".format(duration))
+#             duration = str(duration)
+#             success = "Success"
+#             pass
+#         else:
+#             intensitiesFlask = ""
+#             # a, b, c = calibrarSensores(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCapturas)
+#             pass
+#         pass
+#     except Exception as errorCalibrarSensoresTierra:
+#         print("error captura/calibracion")
+#         raise errorCalibrarSensoresTierra
+#     return intensitiesFlask 
+#     #+sensorTierraNIRl+tiempoIntegracionl+numeroCapturasl+success
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=5005)

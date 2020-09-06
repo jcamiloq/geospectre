@@ -56,7 +56,7 @@ def capturarVueloSinc(sensorVueloNIR, sensorVueloVIS, tiempoIntegracion, numeroC
     errorCal = "F"
     errorBd = "F"
     errorCapturaV = ""
-    filePath = 'D:/Tesis/Api/Flask/tmp/archivoTemporalVuelo.txt';
+    filePath = '/tmp/archivoTemporalVuelo.txt';
     try:
         sumaCapturado = 0.0
         if os.path.exists(filePath):

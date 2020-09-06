@@ -614,7 +614,7 @@ def capturarBlanco():
     nombreMisionCrear = data["nombreMisionCrear"]
     tiempoIntegracion = data["tiempoIntegracion"]
     numeroCapturas = data["numeroCapturas"]
-    filePath = 'D:/Tesis/Api/Flask/tmp/archivoTemporalBlanco.txt';
+    filePath = '/tmp/archivoTemporalBlanco.txt';
     if os.path.exists(filePath):
         os.remove(filePath)
     else:
@@ -629,7 +629,7 @@ def capturarBlanco():
         print("limiteCalibracion = " + str(sumaBlanco))
         # print(a)
         makeImageW(a)
-        with open("D:/Tesis/Api/Flask/tmp/imagenEspectroW.png", "rb") as image_file:
+        with open("/tmp/imagenEspectroW.png", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
             encoded_string = encoded_string.decode("utf-8")
             # print(encoded_string)
@@ -654,7 +654,7 @@ def capturarNegro():
     nombreMisionCrear = data["nombreMisionCrear"]
     tiempoIntegracion = data["tiempoIntegracion"]
     numeroCapturas = data["numeroCapturas"]
-    filePath = 'D:/Tesis/Api/Flask/tmp/archivoTemporalNegro.txt';
+    filePath = '/tmp/archivoTemporalNegro.txt';
     if os.path.exists(filePath):
         os.remove(filePath)
     else:
@@ -663,7 +663,7 @@ def capturarNegro():
         negroCapturado = capturarNegroRpi(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas)
         n= getFilesNegro(negroCapturado)
         makeImageD(n)
-        with open("D:/Tesis/Api/Flask/tmp/imagenEspectroD.png", "rb") as image_file:
+        with open("/tmp/imagenEspectroD.png", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
             encoded_string = encoded_string.decode("utf-8")
             # print(encoded_string)
@@ -679,8 +679,8 @@ def guardarBlanco():
     global idSensorTierraVIS, id_espectros, a
     data = request.get_json()
     data['errorBd'] = ""
-    filePathSrc = 'D:/Tesis/Api/Flask/tmp/archivoTemporalBlanco.txt';
-    filePathDes = 'D:/Tesis/Api/Flask/tmp/archivoBlanco.txt';
+    filePathSrc = '/tmp/archivoTemporalBlanco.txt';
+    filePathDes = '/tmp/archivoBlanco.txt';
     try:
         copyfile(filePathSrc, filePathDes)
         if id_espectros == None:
@@ -725,8 +725,8 @@ def guardarNegro():
     global id_espectros, n, idSensorTierraVIS
     data = request.get_json()
     data['errorBd'] = ""
-    filePathSrc = 'D:/Tesis/Api/Flask/tmp/archivoTemporalNegro.txt';
-    filePathDes = 'D:/Tesis/Api/Flask/tmp/archivoNegro.txt';
+    filePathSrc = '/tmp/archivoTemporalNegro.txt';
+    filePathDes = '/tmp/archivoNegro.txt';
     try:
         copyfile(filePathSrc, filePathDes)
         if id_espectros == None:

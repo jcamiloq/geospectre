@@ -21,9 +21,9 @@ wavelenghtsLista = []
 wavecor = []
 espectrocor = []
 espectrocor2 = []
-num2 = "cult2"
-path = ("D:/subtext/splitTest0/Quieto 1 feb/%s" % (num2))
-wav = ("%s/wavevis.txt" % (path))
+script_dir = os.path.dirname(__file__)
+rel_path = '\\testy\cult2\wavevis.txt'
+wav = os.path.join(script_dir+rel_path)
 with open(wav, "r") as wavevis:
     for line in wavevis:
         line = line[:-4]
@@ -88,14 +88,14 @@ def set_gps_location(file_name, lat, lng, altitude):
 def getFilesBlanco(blancoCapturado):
     blancoCapturadoLista=[]
     # guardar txt de la captura
-    appendFile = open('D:/Tesis/Api/Flask/tmp/archivoTemporalBlanco.txt', 'w')
+    appendFile = open('/tmp/archivoTemporalBlanco.txt', 'w')
     for i in range(len(blancoCapturado)):
         appendFile.write(str(blancoCapturado[i]))
     appendFile.close()
     #blanco capturado es un array de strings de tamaño 14336 que al escribirse por
     #líneas en el archivo queda de 1024----14336/14
     # abrir txt capura y guardar en []
-    with open('D:/Tesis/Api/Flask/tmp/archivoTemporalBlanco.txt', "r") as blancovis:
+    with open('/tmp/archivoTemporalBlanco.txt', "r") as blancovis:
         for line in blancovis:
             line = line[0:4]
             blancoCapturadoLista.append(line)
@@ -105,12 +105,12 @@ def getFilesBlanco(blancoCapturado):
 def getFilesNegro(negroCapturado):
     negroCapturadoLista = []
     # Guardar txt de la captura
-    appendFile = open('D:/Tesis/Api/Flask/tmp/archivoTemporalNegro.txt', 'w')
+    appendFile = open('/tmp/archivoTemporalNegro.txt', 'w')
     for i in range(len(negroCapturado)):
         appendFile.write(str(negroCapturado[i]))
     appendFile.close()
     # abrir txt de la captura y gyardar en []
-    with open('D:/Tesis/Api/Flask/tmp/archivoTemporalNegro.txt', "r") as negrovis:
+    with open('/tmp/archivoTemporalNegro.txt', "r") as negrovis:
         for line in negrovis:
             line = line[0:4]
             negroCapturadoLista.append(line)
@@ -119,11 +119,11 @@ def getFilesNegro(negroCapturado):
 def getFilesVuelo(vueloCapturado):
     vueloCapturadoLista=[]
     # guardar txt de la captura
-    appendFile = open('D:/Tesis/Api/Flask/tmp/archivoTemporalVuelo.txt', 'w')
+    appendFile = open('/tmp/archivoTemporalVuelo.txt', 'w')
     for i in range(len(vueloCapturado)):
         appendFile.write(str(vueloCapturado[i]))
     appendFile.close()
-    with open('D:/Tesis/Api/Flask/tmp/archivoTemporalVuelo.txt', "r") as blancovis:
+    with open('/tmp/archivoTemporalVuelo.txt', "r") as blancovis:
         for line in blancovis:
             line = line[0:4]
             vueloCapturadoLista.append(line)
@@ -143,7 +143,7 @@ def makeImageW(ejeYMakeImage):
     plt.plot(ejeX, ejeY)#, label='Negro')
     ax.set_ylim(min(ejeY), max(ejeY))
     plt.legend()
-    rutaImagen= "D:/Tesis/Api/Flask/tmp/imagenEspectroW.png"
+    rutaImagen= "/tmp/imagenEspectroW.png"
     resultadoMakeImage= plt.savefig(rutaImagen, format="png")
     plt.cla()
     plt.clf()
@@ -164,7 +164,7 @@ def makeImageD(ejeYMakeImage):
     plt.plot(ejeX, ejeY)#, label='Negro')
     ax.set_ylim(min(ejeY), max(ejeY))
     plt.legend()
-    rutaImagen= "D:/Tesis/Api/Flask/tmp/imagenEspectroD.png"
+    rutaImagen= "/tmp/imagenEspectroD.png"
     resultadoMakeImage= plt.savefig(rutaImagen, format="png")
     plt.cla()
     plt.clf()
@@ -192,7 +192,7 @@ def makeImageC(ejeYMakeImage, j):
     ax.set_ylim(min(espectrocor), max(espectrocor))
 
     plt.legend()
-    rutaImagen= "D:/Tesis/Api/Flask/tmp/imagenEspectroC%s.png" %(str(datetime.datetime.now())[18:19])
+    rutaImagen= "/tmp/imagenEspectroC%s.png" %(str(datetime.datetime.now())[18:19])
     resultadoMakeImage= plt.savefig(rutaImagen, format="png")
     plt.cla()
     plt.clf()
@@ -227,7 +227,7 @@ def makeImageG(ejeYMakeImage, rutaImagen, lat, lon, alt):
     plt.clf()
     plt.close()
 
-    piexif.transplant('D:/Tesis/Api/Flask/base.jpg', rutaImagen)
+    piexif.transplant('/testy/base.jpg', rutaImagen)
     set_gps_location(rutaImagen, lat, lon, alt)
     return resultadoMakeImage
 

@@ -72,59 +72,6 @@ def w_file_VIS(arr1, arr2):
 app = Flask(__name__)
 # api = Api(app)
   
-@app.route('/sensoresTierra/<sensorTierraVIS>/<sensorTierraNIR>/<tiempoIntegracion>/<numeroCapturas>/<aux>', methods=['GET'])										#Añade el recurso
-def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas, aux):
-    try:
-        print(sensorTierraVIS)
-        if aux == "C":
-            print("capturando blanco")
-            start_time_A = time.time()
-            x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/white10.txt"
-            with open(x, 'r') as f:
-                intensitiesFlask = f.read()
-            # print(intensitiesFlask)
-            # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
-            # #sts.runInParallel(read_VIS)  # SINGLE
-            # if queueTierra.full():  # If both the NIR and VIS spectra have been acquired successfully
-            #     # print(queue.qsize()) # The queue size should be 2
-            #     wavelengths_NIR, intensities_NIR, wavelengths_VIS, intensities_VIS = sts.assign_spectra(queue, init_wl_NIR, init_wl_VIS)  # SINGLE
-            # else:
-            #     print("Queue not full")
-            end_time_A = time.time()
-            duration = end_time_A - start_time_A
-            print("Acquisition for {} seconds".format(duration))
-            duration = str(duration)
-            success = "Success"
-            pass
-        elif aux == "N":
-            print("capturando neg")
-            start_time_A = time.time()
-            x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/dark0.txt"
-            with open(x, 'r') as f:
-                intensitiesFlask = f.read()
-            # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
-            # #sts.runInParallel(read_VIS)  # SINGLE
-            # if queueTierra.full():  # If both the NIR and VIS spectra have been acquired successfully
-            #     # print(queue.qsize()) # The queue size should be 2
-            #     wavelengths_NIR, intensities_NIR, wavelengths_VIS, intensities_VIS = sts.assign_spectra(queue, init_wl_NIR, init_wl_VIS)  # SINGLE
-            # else:
-            #     print("Queue not full")
-            end_time_A = time.time()
-            duration = end_time_A - start_time_A
-            print("Acquisition for {} seconds".format(duration))
-            duration = str(duration)
-            success = "Success"
-            pass
-
-        else:
-            intensitiesFlask = ""
-            # a, b, c = calibrarSensores(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas)
-            pass
-        pass
-    except Exception as errorCalibrarSensoresTierra:
-        print("error captura/calibracion")
-        raise errorCalibrarSensoresTierra
-    return intensitiesFlask #+sensorTierraNIRl+tiempoIntegracionl+numeroCapturasl+success
 @app.route('/sensoresVuelo/<sensorVueloVIS>/<sensorVueloNIR>/<tiempoIntegracion>/<numeroCapturas>/<aux>', methods=['GET'])                                     #Añade el recurso
 def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCapturas, aux):
     global counter
@@ -136,7 +83,7 @@ def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCaptu
             # D:\Tesis\Api\Flask\testy\cult2
             if counter > 7:
                 counter = 0
-            x = "D:/Tesis/Api/Flask/testy/cult2/inten%s.txt" %(counter)
+            x = "/testy/cult2/inten%s.txt" %(counter)
             with open(x, 'r') as f:
                 intensitiesFlask = f.read()
             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
