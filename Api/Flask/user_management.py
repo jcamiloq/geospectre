@@ -1,5 +1,5 @@
 from Daos import Conexion
-from Daos.AccesoDatos.DaoEspectros import DaoEspectros
+from Daos.AccesoDatos.DaoUsuarios import DaoUsuarios
 
 class UserManagemet:
     
