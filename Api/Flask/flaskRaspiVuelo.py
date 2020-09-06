@@ -84,7 +84,8 @@ def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCaptu
             if counter > 7:
                 counter = 0
             x = "/testy/cult2/inten%s.txt" %(counter)
-            with open(x, 'r') as f:
+            file_path = FileManagement.to_relative(x)
+            with open(file_path, 'r') as f:
                 intensitiesFlask = f.read()
             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
             # #sts.runInParallel(read_VIS)  # SINGLE

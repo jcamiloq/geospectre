@@ -56,7 +56,8 @@ def capturarVueloSinc(sensorVueloNIR, sensorVueloVIS, tiempoIntegracion, numeroC
     errorCal = "F"
     errorBd = "F"
     errorCapturaV = ""
-    filePath = '/tmp/archivoTemporalVuelo.txt';
+    rel_path = '/tmp/archivoTemporalVuelo.txt';
+    file_path = FileManagement.to_relative(rel_path)
     try:
         sumaCapturado = 0.0
         if os.path.exists(filePath):

@@ -10,11 +10,9 @@
 #     print(return_value)
 import os
 from os import path
+from file_management import FileManagement
 wavelenghtsLista = []
-script_dir = os.path.dirname(__file__)
-print(script_dir)
-rel_path = '\\testy\cult2\wavevis.txt'
-wav = os.path.join(script_dir+rel_path)
+wav = FileManagement.to_relative("/testy/cult2/wavevis.txt")
 print(wav)
 with open(wav, "r") as wavevis:
     for line in wavevis:

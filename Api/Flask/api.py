@@ -49,6 +49,8 @@ from math import sin, cos, sqrt, atan2, radians
 import queue
 from threading import Thread
 
+from file_management import FileManagement
+
 app = Flask(__name__)
 
 sitl = None
@@ -614,7 +616,8 @@ def capturarBlanco():
     nombreMisionCrear = data["nombreMisionCrear"]
     tiempoIntegracion = data["tiempoIntegracion"]
     numeroCapturas = data["numeroCapturas"]
-    filePath = '/tmp/archivoTemporalBlanco.txt';
+    rel_path = '/tmp/archivoTemporalBlanco.txt';
+    filePath = FileManagement.to_relative(rel_path)
     if os.path.exists(filePath):
         os.remove(filePath)
     else:
@@ -629,7 +632,9 @@ def capturarBlanco():
         print("limiteCalibracion = " + str(sumaBlanco))
         # print(a)
         makeImageW(a)
-        with open("/tmp/imagenEspectroW.png", "rb") as image_file:
+        rel_path = "/tmp/imagenEspectroW.png"
+        filePath = FileManagement.to_relative(rel_path)
+        with open(filePath, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
             encoded_string = encoded_string.decode("utf-8")
             # print(encoded_string)
@@ -654,7 +659,8 @@ def capturarNegro():
     nombreMisionCrear = data["nombreMisionCrear"]
     tiempoIntegracion = data["tiempoIntegracion"]
     numeroCapturas = data["numeroCapturas"]
-    filePath = '/tmp/archivoTemporalNegro.txt';
+    rel_path = '/tmp/archivoTemporalNegro.txt';
+    filePath = FileManagement.to_relative(rel_path)
     if os.path.exists(filePath):
         os.remove(filePath)
     else:
@@ -663,7 +669,9 @@ def capturarNegro():
         negroCapturado = capturarNegroRpi(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas)
         n= getFilesNegro(negroCapturado)
         makeImageD(n)
-        with open("/tmp/imagenEspectroD.png", "rb") as image_file:
+        rel_path = "/tmp/imagenEspectroD.png"
+        filePath = FileManagement.to_relative(rel_path)
+        with open(filePath, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
             encoded_string = encoded_string.decode("utf-8")
             # print(encoded_string)
@@ -679,8 +687,10 @@ def guardarBlanco():
     global idSensorTierraVIS, id_espectros, a
     data = request.get_json()
     data['errorBd'] = ""
-    filePathSrc = '/tmp/archivoTemporalBlanco.txt';
-    filePathDes = '/tmp/archivoBlanco.txt';
+    relPathSrc = '/tmp/archivoTemporalBlanco.txt';
+    relPathDes = '/tmp/archivoBlanco.txt';
+    filePathSrc = FileManagement.to_relative(relPathSrc)
+    filePathDes = FileManagement.to_relative(relPathDes)
     try:
         copyfile(filePathSrc, filePathDes)
         if id_espectros == None:
@@ -725,8 +735,10 @@ def guardarNegro():
     global id_espectros, n, idSensorTierraVIS
     data = request.get_json()
     data['errorBd'] = ""
-    filePathSrc = '/tmp/archivoTemporalNegro.txt';
-    filePathDes = '/tmp/archivoNegro.txt';
+    relPathSrc = '/tmp/archivoTemporalNegro.txt';
+    relPathDes = '/tmp/archivoNegro.txt';
+    filePathSrc = FileManagement.to_relative(relPathSrc)
+    filePathDes = FileManagement.to_relative(relPathDes)
     try:
         copyfile(filePathSrc, filePathDes)
         if id_espectros == None:
@@ -1230,14 +1242,9 @@ def guardarEspectro():
             resultado = espectro.resultado
             conn.close()
             ruta += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "Waypoint("+waypointSeleccionado+")"
-            print(ruta)
-            generate(resultado, ruta, float(latlon[0]), float(latlon[1]), altura)
-            # generate(resultado, ruta, float(latlon[0]), float(latlon[1]), 5)
-            # makeImageG(resultado, ruta, float(latlon[0]), float(latlon[1]), 5)
-            # with open("D:/Tesis/Api/Flask/imagenEspectroC2.png", "rb") as image_file:
-            #     encoded_string = base64.b64encode(image_file.read())
-            #     encoded_string = encoded_string.decode("utf-8")
-            # data['espectroR'] = encoded_string
+            filePath = FileManagement.to_relative(ruta)
+            # print(ruta)
+            generate(resultado, filePath, float(latlon[0]), float(latlon[1]), altura)
         else:
             data['errorCarpeta'] = "T"
     except Exception as errorBd:
@@ -1285,8 +1292,9 @@ def guardarTodos():
                 espectro = daoEspectros.getEspectros(idsEspectros[i])
                 resultado = espectro.resultado
                 rutaG += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "WaypointNumber("+str(i)+")"
+                filePath = FileManagement.to_relative(rutaG)
                 print(rutaG)
-                generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), altura)
+                generate(resultado, filePath, float(latlons[0]), float(latlons[1]), altura)
 
                 # generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), 5)
             conn.close()

@@ -18,6 +18,7 @@ from Daos.AccesoDatos.DaoEspectros import DaoEspectros
 from Daos.AccesoDatos.Logica.Espectros import Espectros
 from file_management import FileManagement
 import random
+
 wavelenghtsLista = []
 wavecor = []
 espectrocor = []
@@ -88,14 +89,18 @@ def set_gps_location(file_name, lat, lng, altitude):
 def getFilesBlanco(blancoCapturado):
     blancoCapturadoLista=[]
     # guardar txt de la captura
-    appendFile = open('/tmp/archivoTemporalBlanco.txt', 'w')
+    rel_path = '/tmp/archivoTemporalBlanco.txt'
+    filePath = FileManagement.to_relative(rel_path)
+    appendFile = open(filePath, 'w')
     for i in range(len(blancoCapturado)):
         appendFile.write(str(blancoCapturado[i]))
     appendFile.close()
     #blanco capturado es un array de strings de tamaño 14336 que al escribirse por
     #líneas en el archivo queda de 1024----14336/14
     # abrir txt capura y guardar en []
-    with open('/tmp/archivoTemporalBlanco.txt', "r") as blancovis:
+    rel_path = '/tmp/archivoTemporalBlanco.txt'
+    filePath = FileManagement.to_relative(rel_path)
+    with open(filePath, "r") as blancovis:
         for line in blancovis:
             line = line[0:4]
             blancoCapturadoLista.append(line)
@@ -105,11 +110,14 @@ def getFilesBlanco(blancoCapturado):
 def getFilesNegro(negroCapturado):
     negroCapturadoLista = []
     # Guardar txt de la captura
-    appendFile = open('/tmp/archivoTemporalNegro.txt', 'w')
+    rel_path = '/tmp/archivoTemporalNegro.txt'
+    filePath = FileManagement.to_relative(rel_path)
+    appendFile = open(filePath, 'w')
     for i in range(len(negroCapturado)):
         appendFile.write(str(negroCapturado[i]))
     appendFile.close()
     # abrir txt de la captura y gyardar en []
+    filePath = FileManagement.to_relative(rel_path)
     with open('/tmp/archivoTemporalNegro.txt', "r") as negrovis:
         for line in negrovis:
             line = line[0:4]
@@ -119,7 +127,9 @@ def getFilesNegro(negroCapturado):
 def getFilesVuelo(vueloCapturado):
     vueloCapturadoLista=[]
     # guardar txt de la captura
-    appendFile = open('/tmp/archivoTemporalVuelo.txt', 'w')
+    rel_path = '/tmp/archivoTemporalVuelo.txt'
+    filePath = FileManagement.to_relative(rel_path)
+    appendFile = open(filePath, 'w')
     for i in range(len(vueloCapturado)):
         appendFile.write(str(vueloCapturado[i]))
     appendFile.close()
@@ -164,8 +174,11 @@ def makeImageD(ejeYMakeImage):
     plt.plot(ejeX, ejeY)#, label='Negro')
     ax.set_ylim(min(ejeY), max(ejeY))
     plt.legend()
+
     rutaImagen= "/tmp/imagenEspectroD.png"
-    resultadoMakeImage= plt.savefig(rutaImagen, format="png")
+    filePath = FileManagement.to_relative(rutaImagen)
+    
+    resultadoMakeImage= plt.savefig(filePath, format="png")
     plt.cla()
     plt.clf()
     plt.close()
@@ -193,7 +206,8 @@ def makeImageC(ejeYMakeImage, j):
 
     plt.legend()
     rutaImagen= "/tmp/imagenEspectroC%s.png" %(str(datetime.datetime.now())[18:19])
-    resultadoMakeImage= plt.savefig(rutaImagen, format="png")
+    filePath = FileManagement.to_relative(rutaImagen)
+    resultadoMakeImage= plt.savefig(filePath, format="png")
     plt.cla()
     plt.clf()
     plt.close()
@@ -226,7 +240,7 @@ def makeImageG(ejeYMakeImage, rutaImagen, lat, lon, alt):
     plt.cla()
     plt.clf()
     plt.close()
-
+    filePath = FileManagement.to_relative(rel_path)
     piexif.transplant('/testy/base.jpg', rutaImagen)
     set_gps_location(rutaImagen, lat, lon, alt)
     return resultadoMakeImage

@@ -11,6 +11,8 @@ import argparse
 
 from flask import Flask, send_file
 import requests
+
+from file_management import FileManagement
 #from flask_restful import Resource, Api
 # global spec_NIR_Tierra, spec_VIS_Tierra, wavelengths_NIR_Tierra, intensities_NIR_Tierra, wavelengths_VIS_Tierra, intensities_VIS_Tierra, queueTierra, outTierra
 # global sensorTierraVIS, sensorTierraNIR, sensorVueloVIS, sensorVueloVIS, tiempoIntegracion, numeroCapturas
@@ -82,7 +84,8 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
             start_time_A = time.time()
             # x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/white10.txt"
             x = "/testy/cult2/white%s.txt" %(counter)
-            with open(x, 'r') as f:
+            file_path = FileManagement.to_relative(x)
+            with open(file_path, 'r') as f:
                 intensitiesFlask = f.read()
             # print(intensitiesFlask)
             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
@@ -103,7 +106,8 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
             print("capturando neg")
             start_time_A = time.time()
             x = "/testy/cult2/dark0.txt"
-            with open(x, 'r') as f:
+            file_path = FileManagement.to_relative(x)
+            with open(file_path, 'r') as f:
                 intensitiesFlask = f.read()
             # sts.runInParallel(read_VIS(b, c), read_NIR(a, c))                                                             #DOUBLE
             # #sts.runInParallel(read_VIS)  # SINGLE
