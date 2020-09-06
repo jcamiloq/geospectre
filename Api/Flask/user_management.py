@@ -6,7 +6,8 @@ class UserManagemet:
     
     @staticmethod
     def login(nombreUsuario, password):
-        data = {} 
+        data = {}
+        data['errorBd'] = ""
         try:
             conn = Conexion.conexion()
             daoUsuarios = DaoUsuarios(conn)
