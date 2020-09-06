@@ -159,7 +159,20 @@ def telem():
             dronConectado = "F"
         else:
             dronConectado = "T"
-    return vehicle.location.global_relative_frame, vehicle.attitude, vehicle.airspeed, vehicle.battery, senalCaptura, vehicle.commands.next, armado, vehicle.battery.level, dronConectado, capturando, flagTerminar
+    print(senalCaptura + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    dicTelem = {
+        "posicionDron": vehicle.location.global_relative_frame,
+        "actitudDron": vehicle.attitude,
+        "velocidadDron": vehicle.airspeed,
+        "bateriaDron": senalCaptura,
+        "waypointActual": vehicle.commands.next,
+        "armado": armado,
+        "batteryLevel": vehicle.battery.level,
+        "dronConectado": dronConectado,
+        "capturando": capturando,
+        "flagTerminar": flagTerminar
+    }
+    return dicTelem
 
 def estadoWaypoints(entrada): #Recepción de Waypoints
     global waypoints, estado

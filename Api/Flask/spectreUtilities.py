@@ -117,8 +117,9 @@ def getFilesNegro(negroCapturado):
         appendFile.write(str(negroCapturado[i]))
     appendFile.close()
     # abrir txt de la captura y gyardar en []
+    rel_path = '/tmp/archivoTemporalNegro.txt'
     filePath = FileManagement.to_relative(rel_path)
-    with open('/tmp/archivoTemporalNegro.txt', "r") as negrovis:
+    with open(filePath, "r") as negrovis:
         for line in negrovis:
             line = line[0:4]
             negroCapturadoLista.append(line)
@@ -133,7 +134,7 @@ def getFilesVuelo(vueloCapturado):
     for i in range(len(vueloCapturado)):
         appendFile.write(str(vueloCapturado[i]))
     appendFile.close()
-    with open('/tmp/archivoTemporalVuelo.txt', "r") as blancovis:
+    with open(filePath, "r") as blancovis:
         for line in blancovis:
             line = line[0:4]
             vueloCapturadoLista.append(line)
@@ -212,7 +213,7 @@ def makeImageC(ejeYMakeImage, j):
     plt.cla()
     plt.clf()
     plt.close()
-    return rutaImagen
+    return filePath
 
 def makeImageG(ejeYMakeImage, rutaImagen, lat, lon, alt):
     # global wavelenghtsLista

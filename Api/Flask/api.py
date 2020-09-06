@@ -815,7 +815,7 @@ def guardarWaypoints():
     # print(waypointsDic)
     for i in range(0, len(waypointsDic)):
         waypointsList.append(waypointsDic["waypoint{0}".format(i)])
-    a, arrayPuntosDescanso, puntoMedio =calcularDistanciaMetros(waypointsList)
+    a, arrayPuntosDescanso, puntoMedio =calcularDistanciaMetros(arrayWaypoints)
     for i in range(0, len(arrayPuntosDescanso)):
         aPD.append(str(arrayPuntosDescanso[i]))
     data['arrayPuntosDescanso'] = puntoMedio

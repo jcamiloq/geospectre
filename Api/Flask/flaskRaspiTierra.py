@@ -82,6 +82,8 @@ def sensoresTierra(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCa
         if aux == "C":
             print("capturando blanco")
             start_time_A = time.time()
+            if counter > 1:
+                counter = 0
             # x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/white10.txt"
             x = "/testy/cult2/white%s.txt" %(counter)
             file_path = FileManagement.to_relative(x)

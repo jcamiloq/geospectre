@@ -11,6 +11,8 @@ import argparse
 
 from flask import Flask, send_file
 import requests
+
+from file_management import FileManagement
 #from flask_restful import Resource, Api
 # global spec_NIR_Tierra, spec_VIS_Tierra, wavelengths_NIR_Tierra, intensities_NIR_Tierra, wavelengths_VIS_Tierra, intensities_VIS_Tierra, queueTierra, outTierra
 # global sensorTierraVIS, sensorTierraNIR, sensorVueloVIS, sensorVueloVIS, tiempoIntegracion, numeroCapturas
