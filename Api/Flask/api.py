@@ -55,6 +55,11 @@ app = Flask(__name__)
 
 sitl = None
 
+###########################################################################
+from user_management import UserManagemet
+
+
+###########################################################################
 CORS(app, resources={r"/login":{"origins":"*"},
     r"/hover":{"origins":"*"},
     r"/registro":{"origins":"*"},
@@ -280,19 +285,7 @@ def login():
     data['errorBd'] = ""
     nombreUsuario= data["nombreUsuario"]
     password= data["password"]
-    try:
-        conn = conexion()
-        daoUsuarios = DaoUsuarios(conn)
-        usuario = daoUsuarios.getUsuarioLogin(nombreUsuario, password)
-        
-        if usuario == None:
-            data['errorBd'] = "T"
-        else:
-            print(usuario.nombre)
-    except Exception as e:
-        data['errorBd'] = "T"
-        raise e
-    return json.dumps(data)
+    return UserManagemet.login(nombreUsuario, password)
 
 @app.route('/registro', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])

@@ -4,6 +4,9 @@ from os import path
 class FileManagement():
     @staticmethod
     def to_relative(route: str, script_dir: str = ""):
+        """
+            script_dir = os.path.dirname(__file__)
+        """
         file_dir = route.replace("/", '\\')
         if script_dir == "":
             script_dir = os.path.dirname(__file__)
