@@ -16,14 +16,14 @@ from fractions import Fraction
 from Daos.Conexion import *
 from Daos.AccesoDatos.DaoEspectros import DaoEspectros
 from Daos.AccesoDatos.Logica.Espectros import Espectros
+from file_management import FileManagement
 import random
 wavelenghtsLista = []
 wavecor = []
 espectrocor = []
 espectrocor2 = []
-script_dir = os.path.dirname(__file__)
 rel_path = '\\testy\cult2\wavevis.txt'
-wav = os.path.join(script_dir+rel_path)
+wav = FileManagement.to_relative(rel_path)
 with open(wav, "r") as wavevis:
     for line in wavevis:
         line = line[:-4]
