@@ -154,7 +154,8 @@ def makeImageW(ejeYMakeImage):
     ax.set_ylim(min(ejeY), max(ejeY))
     plt.legend()
     rutaImagen= "/tmp/imagenEspectroW.png"
-    resultadoMakeImage= plt.savefig(rutaImagen, format="png")
+    filePath = FileManagement.to_relative(rutaImagen)
+    resultadoMakeImage= plt.savefig(filePath, format="png")
     plt.cla()
     plt.clf()
     plt.close()
