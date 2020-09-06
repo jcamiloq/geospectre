@@ -7,7 +7,7 @@ class UserManagemet:
     def login(nombreUsuario, password):
         data = {} 
         try:
-            conn = conexion()
+            conn = Conexion.conexion()
             daoUsuarios = DaoUsuarios(conn)
             usuario = daoUsuarios.getUsuarioLogin(nombreUsuario, password)
             
