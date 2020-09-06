@@ -20,4 +20,3 @@ class UserManagemet:
             data['errorBd'] = "T"
             raise e
         return json.dumps(data)
-
