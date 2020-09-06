@@ -369,24 +369,32 @@ def obtenerTelemetria():
     data = {}
     data['errorBd'] = ""
     # ------------------LLAMADA A DRONE.PY---------------
-    a, b, c, d, e, f, g, h, i, j, k = telem()
+    dicTelem = telem()
+    posicionDron = str(dicTelem["posicionDron"])
+    waypointActual = dicTelem["waypointActual"]
+    actitudDron = str(dicTelem["actitudDron"])
+    velocidadDron = str(dicTelem["velocidadDron"])[0:4]
+    bateriaDron = str(dicTelem["bateriaDron"])
+    senalCaptura = dicTelem["senalCaptura"]
+    armado = dicTelem["armado"]
+    batteryLevel = dicTelem["batteryLevel"]
+    dronConectado = dicTelem["dronConectado"]
+    capturando = dicTelem["capturando"]
+    flagTerminar = dicTelem["flagTerminar"]
     # ---------------------------------------------------
-    waypointActual = f
-    posicionDron = str(a)
     posicionDron = posicionDron.split(":")[1]
     posicionDron = posicionDron.split(",")
     lat = posicionDron[0].split("=")[1]
     lon = posicionDron[1].split("=")[1]
     alt = posicionDron[2].split("=")[1]
     print('Position: %s'% posicionDron)
-    print("Armado? " + g)
+    print("Armado? " + armado)
     # print('Position: %s'% vehicle.location.global_relative_frame)
     # print(lat)
     # print(lon)
     # print(alt)
 
     #- Read the actual attitude roll, pitch, yaw
-    actitudDron = str(b)
     actitudDron = actitudDron.split(":")[1]
     actitudDron = actitudDron.split(",")
     pitch = round(float(actitudDron[0].split("=")[1]), 5)
@@ -397,16 +405,14 @@ def obtenerTelemetria():
     # print(roll)
 
     #- Read the actual velocity (m/s)
-    velocidadDron = str(c)[0:4]
     # print('Velocity: %s'% velocidadDron)
     # print(velocidadDron)
 
-    bateriaDron = str(d)
     bateriaDron = bateriaDron.split("=")[3]
     # print('Battery: %s'%bateriaDron)
     # print(bateriaDron)
     # print(h)
-    if int(h) <= limiteBateria:
+    if int(batteryLevel) <= limiteBateria:
         data['flagBatt'] = "T"
     try:
         conn = conexion()
@@ -442,12 +448,12 @@ def obtenerTelemetria():
     data['velocidadDron'] = velocidadDron
     data['bateriaDron'] = bateriaDron
 
-    data['senalCaptura'] = e
-    data['waypActual'] = f
-    data['armado'] = g
-    data['conectado']= i
-    data['capturando']= j
-    data['flagTerminar'] = k
+    data['senalCaptura'] = senalCaptura
+    data['waypActual'] = waypointActual
+    data['armado'] = armado
+    data['conectado']= dronConectado
+    data['capturando']= capturando
+    data['flagTerminar'] = flagTerminar
 
     if(sumaBlanco != 0.0):
         if(sumaCapturado != 0.0):
