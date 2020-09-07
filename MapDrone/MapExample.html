@@ -917,6 +917,7 @@
 		miStorage.setItem("onMision", "");
 		miStorage.setItem("modoAdquisicion", "");
 		miStorage.setItem("modoVuelo", "");
+		enCaptura = false;
 
 	    var mymap = L.map('mapid').setView([3.3727414349040905,-76.53012274101879], 20);	
 		//Llamar opciones del mapa para que se muestre (Regularmente no se toca)
@@ -938,6 +939,7 @@
 		var drone = null;
 		var dronConectado = false;
 		contadorCapturaContinua = 0
+		var waypointEnCaptura = -1
 
 		function onMapClick(e) {
 			if(miStorage.getItem("flagDescanso") == "T"){
@@ -1316,6 +1318,7 @@
 				var nombreUsuario = miStorage.getItem("usuario");
 				var modoVuelo = $("#modoVuelo label.active input").val();
 				var modoAdquisicion = $("#modoAdquisicion label.active input").val();
+				console.log(modoAdquisicion)
 				var elevacion = $("#elevacion").val();
 				var velocidad = $("#velocidad").val();
 				var nombreMisionCrear = $("#nombreMisionCrear").val();
@@ -1338,6 +1341,9 @@
 				if(modoAdquisicion == 1){
 					miStorage.setItem("modoAdquisicion", "auto");
 					$("#btnCapturar").prop("disabled", true);
+				}
+				else{
+					miStorage.setItem("modoAdquisicion", "manual");
 				}
 				if($.trim(elevacion)=="" || $.trim(velocidad)=="" || $.trim(nombreMisionCrear)==""){
 					SoftNotification.show("El valor de elevación o velocidad no pueden estar vacíos", "warning")
@@ -1548,11 +1554,18 @@
 									$("#LabelEstadoWp").html("Capturando");
 									$("#btnCapturar").prop("disabled", true);
 								}
+								if(info.enCapturaContinua != "T" && miStorage.getItem("modoAdquisicion") == "manual"){
+									$("#btnCapturar").prop("disabled", false);
+								}
 								if(info.enCapturaContinua == "F"){
 									$("#LabelEstadoWp").html("En espera");
 								}
+								console.log(miStorage.getItem("modoAdquisicion"));
 								if (info.senalCaptura == "G" && miStorage.getItem("modoAdquisicion") == "auto"){
-									capturarVuelo(2);
+									if(waypointActual!=waypointEnCaptura){
+										waypointEnCaptura = waypointActual;
+										capturarVuelo(2);
+									}
 								}
 
 								if (info.flagBatt == "T" && countFlagBatt2 == 0 && flagTerminar!="T"){

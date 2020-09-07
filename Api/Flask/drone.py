@@ -20,6 +20,7 @@ necesitaCalibrar = False
 counterhover = 0
 flagTerminar = ""
 hover = False
+senalCaptura = ""
 
 COM = 'COM4'
 nextwaypoint=1
@@ -124,20 +125,20 @@ def telem():
     # flagReanudar = flagReanudarT
     # flagPausar = flagPausarT
     if vehicle:
-        senalCaptura = ""
+        # senalCaptura = ""
         if vehicle.location.global_relative_frame.alt<altura*0.95:
             flagMision = "F"
         else:
             flagMision = "T"
-        if vehicle.commands.next:                           #Verifica si se han subido comandos
-            if vehicle.commands.next <= len(waypoints):   #Verifica si se ha llegado al penultimo comando
-                d = distance_to_current_waypoint()
-                if d <= 0.5 and alertaProximidad != 1:        #Verifica si se ha llegado al punto de captura
-                    sleep(0.5)
-                    senalCaptura = "G"                      
-                    alertaProximidad = 1
-                if alertaProximidad == 1 and d >= 1:          #Verifica si se salió del punto de captura
-                    alertaProximidad = 0
+        # if vehicle.commands.next:                           #Verifica si se han subido comandos
+        #     if vehicle.commands.next <= len(waypoints):   #Verifica si se ha llegado al penultimo comando
+        #         d = distance_to_current_waypoint()
+        #         if d <= 0.5 and alertaProximidad != 1:        #Verifica si se ha llegado al punto de captura
+        #             sleep(0.5)
+        #             senalCaptura = "G"                      
+        #             alertaProximidad = 1
+        #         if alertaProximidad == 1 and d >= 1:          #Verifica si se salió del punto de captura
+        #             alertaProximidad = 0
         # print(" Global Location: %s" % vehicle.location.global_frame)
         # print(" Global Location (relative altitude): %s" % vehicle.location.global_relative_frame)
         # print(" Local Location: %s" % vehicle.location.local_frame)
@@ -332,12 +333,14 @@ def capturarVueloDrone(etapa):
         capturando = False
 
 def mision(firstHome):
-    global vehicle, remainingWp, flagPausar, flagTerminar
+    global vehicle, remainingWp, flagPausar, flagTerminar, senalCaptura
     remainingWp = []
+    previousWaypoint = 1
+    senalCaptura = ""
     while True:
         while capturando:
             print("capturando en misión")
-            sleep(0.5)
+            sleep(2)
         while necesitaCalibrar:
             print("Recalibrando Sensores")
             vehicle.mode = VehicleMode("GUIDED")
@@ -354,6 +357,21 @@ def mision(firstHome):
             sleep(1)
         vehicle.mode = VehicleMode("AUTO")
         nextwaypoint=vehicle.commands.next
+        if nextwaypoint > previousWaypoint:
+            previousWaypoint = nextwaypoint
+            
+            while vehicle.mode.name != "GUIDED":
+                vehicle.mode = VehicleMode("GUIDED")
+                point = LocationGlobalRelative(float(str(vehicle.location.global_relative_frame.lat)),float(str(vehicle.location.global_relative_frame.lon)), altura)
+                if(distance_to_someone_waypoint(point.lat,point.lon)>=0.1):
+                    vehicle.simple_goto(point)
+            senalCaptura = "G"
+            while vehicle.mode.name != "AUTO":
+                vehicle.mode = VehicleMode("AUTO")
+                print("going to AUTO")
+                sleep(0.3)
+            senalCaptura = ""
+
         print("worker ciclo: " + str(nextwaypoint))
         print('Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint()))
         # print(str(len(wp)))
