@@ -8,16 +8,12 @@
 #     future = executor.submit(foo, 'world!')
 #     return_value = future.result()
 #     print(return_value)
-# import os
-# from os import path
-from file_management import FileManagement
-route = "a/a"
-file_dir = route.replace("/", '\\')
-# wavelenghtsLista = []
-# wav = FileManagement.to_relative("/testy/cult2/wavevis.txt")
-# print(wav)
-# with open(wav, "r") as wavevis:
-#     for line in wavevis:
-#         line = line[:-4]
-#         wavelenghtsLista.append(line)
-print(file_dir)
+listaComandos = []
+with open("tmp/asd.txt", 'w') as file_:
+    print(" Write mission to file")
+    file_.write("output")
+with open("tmp/asd.txt", "r") as m:
+    for line in m:
+        listaComandos.append(line)
+print(listaComandos)
+print(listaComandos[0][0:-2])

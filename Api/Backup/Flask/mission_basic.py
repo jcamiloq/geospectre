@@ -100,7 +100,19 @@ def download_mission():
     cmds.download()
     cmds.wait_ready() # wait until download is complete.
 
-
+def download_mission1():
+    """
+    Downloads the current mission and returns it in a list.
+    It is used in save_mission() to get the file information to save.
+    """
+    print(" Download mission from vehicle")
+    missionlist=[]
+    cmds = vehicle.commands
+    cmds.download()
+    cmds.wait_ready()
+    for cmd in cmds:
+        missionlist.append(cmd)
+    return missionlist
 
 def adds_square_mission(aLocation, aSize):
     """
@@ -133,8 +145,8 @@ def adds_square_mission(aLocation, aSize):
     # cmds.add(Command(0,0,0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED, 0, 0, 0, 0.3,0,0,0,0,0))
 
     cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point2.lat, point2.lon, 12))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point3.lat, point3.lon, 13))
-    cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point4.lat, point4.lon, 14))
+    # cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point3.lat, point3.lon, 13))
+    # cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point4.lat, point4.lon, 14))
     #add dummy waypoint "5" at point 4 (lets us know when have reached destination)
     cmds.add(Command( 0, 0, 0, mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT, mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, 0, 0, 7, 0, 0, 0, point4.lat, point4.lon, 14))    
 
@@ -177,11 +189,11 @@ def arm_and_takeoff(aTargetAltitude):
 
         
 print('Create a new mission (for current location)')
-adds_square_mission(vehicle.location.global_frame,30)
+adds_square_mission(vehicle.location.global_frame,3)
 
 
 # From Copter 3.3 you will be able to take off using a mission item. Plane must take off using a mission item (currently).
-arm_and_takeoff(10)
+arm_and_takeoff(5)
 
 print("Starting mission")
 # Reset mission set to first (0) waypoint
@@ -197,23 +209,39 @@ vehicle.mode = VehicleMode("AUTO")
 # Uses distance_to_current_waypoint(), a convenience function for finding the 
 #   distance to the next waypoint.
 counter = 0
+
+
+
+def save_mission(aFileName):
+    print("\nSave mission from Vehicle to file: %s" % aFileName)    
+    #Download mission from vehicle
+    missionlist = download_mission1()
+    output = ""
+    #Add file-format information
+    for cmd in missionlist:
+        commandline="%s,%s\n" % (cmd.x,cmd.y)
+        output+=commandline
+    with open(aFileName, 'w') as file_:
+        print(" Write mission to file")
+        file_.write(output)
+save_mission('asd.txt')
+save_mission('asd1.txt')
+
 while True:
     nextwaypoint=vehicle.commands.next
     print('Distance to waypoint (%s): %s' % (nextwaypoint, distance_to_current_waypoint()))
-    distance2wayp = distance_to_current_waypoint()
-    if counter >= 1:
-        print(distance2wayp)
-        if distance2wayp <= 15:
-            vehicle.mode = VehicleMode("GUIDED")
-            vehicle.airspeed = 0.1
-            vehicle.mode = VehicleMode("AUTO")
-            print("cambió airspeed?: " + str(vehicle.airspeed))
-    if counter == 3:
-        
-    print("Airspeed: "+str(vehicle.airspeed))
-    print("Location.Frame: "+str(vehicle.location.global_frame))
+    # distance2wayp = distance_to_current_waypoint()
+    # if counter >= 1:
+    #     print(distance2wayp)
+    #     if distance2wayp <= 15:
+    #         vehicle.mode = VehicleMode("GUIDED")
+    #         vehicle.airspeed = 0.1
+    #         vehicle.mode = VehicleMode("AUTO")
+    #         print("cambió airspeed?: " + str(vehicle.airspeed))
+    # print("Airspeed: "+str(vehicle.airspeed))
+    # print("Location.Frame: "+str(vehicle.location.global_frame))
     
-    if nextwaypoint==5: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
+    if nextwaypoint==3: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
         print("Exit 'standard' mission when start heading to final waypoint (5)")
         break;
     counter += 1

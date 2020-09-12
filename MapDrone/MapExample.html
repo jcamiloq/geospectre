@@ -249,7 +249,7 @@
 					<strong>Espectros de Referencia Guardados! </strong> Puede proceder a la siguiente pestaña.
 				</div>
 				<div class="row" style="height:100%">
-					<div class="col-md-2 mr-4">
+					<div class="col-md-2 mr-3">
 						<div class="row">
 							<div class="col-md-12">
 								<div class="text-nowrap ml-n1" style="width: 8rem;">
@@ -742,12 +742,12 @@
 		</div>
 		<div class="tab-pane fade" id="tabData" role="tabpanel" aria-labelledby="profile-tab2">
 			<div class="container-fluid border" style="max-height: 100%">
-				<div class="row justify-content-sm-center" style="min-height:100%; min-height: 100%">
-					<div class="col-md-12">
+				<div class="row " style="min-height:100%; min-height: 100%">
+					<div class="col-md-8">
 						<div class="row justify-content-sm-center mt-2" style="max-height:15%">
 							<h5>Visualización y Descarga de Información</h5>
 						</div>
-						<div class="row" style="max-height: 100%; min-height: 100%">
+						<div class="row" style="max-height: 60%; min-height: 60%">
 							<div class="col-md-3 border" style="min-height: 100%">
 								<div class="row">
 									<div class="col-md-12 form-group">
@@ -817,7 +817,7 @@
 								</div>
 								<div class="row justify-content-center">
 									<div class="col-md-6">
-										<button type="button" class="btn btn-primary btn-sm w-100" id="btnVerEspectro" onclick="verEspectro()" disabled="true">Ver Espectro</button>
+										<button type="button" class="btn btn-primary btn-sm w-100 h-100" id="btnVerEspectro" onclick="verEspectro()" disabled="true">Ver Espectro</button>
 									</div>
 									<div class="col-md-6">
 										<button type="button" class="btn btn-primary btn-sm w-100" data-toggle="modal" id="btnGuardarEspectro" data-target="#modalGuardarEspectro" disabled="True">Guardar Espectro</button>
@@ -915,7 +915,7 @@
 		var miStorage = window.localStorage;
 
 		miStorage.setItem("onMision", "");
-		miStorage.setItem("modoAdquisicion", "");
+		miStorage.setItem("modoAdquisicion", "auto");
 		miStorage.setItem("modoVuelo", "");
 		enCaptura = false;
 
@@ -940,6 +940,7 @@
 		var dronConectado = false;
 		contadorCapturaContinua = 0
 		var waypointEnCaptura = -1
+		var contadorWaypoints = 1
 
 		function onMapClick(e) {
 			if(miStorage.getItem("flagDescanso") == "T"){
@@ -1042,14 +1043,14 @@
 			});
 
 			
-// 			var tab2 = document.getElementById("profile-tab");
-//   			tab2.classList.add("disabled");
+			var tab2 = document.getElementById("profile-tab");
+  			tab2.classList.add("disabled");
 
-//   			var tab3 = document.getElementById("profile-tab1");
-//   			tab3.classList.add("disabled");
-// // 
-//   			var tab4 = document.getElementById("profile-tab2");
-//   			tab4.classList.add("disabled");
+  			var tab3 = document.getElementById("profile-tab1");
+  			tab3.classList.add("disabled");
+
+  			// var tab4 = document.getElementById("profile-tab2");
+  			// tab4.classList.add("disabled");
 
   			// var tab5 = document.getElementById("profile-tab3");
   			// tab5.classList.add("disabled");
@@ -1304,7 +1305,13 @@
 			}
 			// regError();
 		}
+		function eliminarCookies() {
+	        document.cookie.split(";").forEach(function(c) {
+        		document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+	        	});
+        }
 		function crearMision(){
+			eliminarCookies()
 			miStorage.setItem("rutaGuardada", "");
 			if(miStorage.getItem("conectado") == "T"){
 				SoftNotification.show("Había una misión en curso, terminando misión previa", "warning");
@@ -1565,6 +1572,7 @@
 									if(waypointActual!=waypointEnCaptura){
 										waypointEnCaptura = waypointActual;
 										capturarVuelo(2);
+										contadorWaypoints = contadorWaypoints+1
 									}
 								}
 
@@ -1675,8 +1683,12 @@
 								$("#labelVelocidad").html(velocidadDron);
 								$("#labelBateria").html(bateriaDron);
 								$("#labelIrradancia").html(porcentageIrr);
-								$("#LabelWpActual").html(waypointActual);
-
+								if(contadorWaypoints>miStorage.getItem("totalWaypoints")){
+									$("#LabelWpActual").html("Home");
+								}
+								else{
+									$("#LabelWpActual").html(contadorWaypoints);
+								}
 							}			
 							// console.log('El resultado de telem:'+ info);
 
@@ -2010,6 +2022,7 @@
 			waypointsTemp = []
 			trimError= true;
 			waypoints2 = wps.split("\n");
+			miStorage.setItem("totalWaypoints",waypoints2.length);
 			for (var i = 0; i < waypoints2.length; i++) {
 				waypoints3= waypoints2[i].split(",");
 				if(waypoints3.length != 2){
@@ -2261,7 +2274,7 @@
 						miStorage.setItem("onMision", "F");
 						miStorage.setItem("blancoReady", "F");
 						miStorage.setItem("negroReady", "F");
-						miStorage.setItem("modoAdquisicion", "");
+						// miStorage.setItem("modoAdquisicion", "");
 						miStorage.setItem("modoVuelo", "");
 						var element = document.getElementById("profile-tab2");
 			  			element.classList.remove("disabled");
@@ -2382,6 +2395,10 @@
 						$("#btnDetener").prop("disabled", true);
 
 						miStorage.setItem("flagReanudar", "T");
+						miStorage.setItem("onMision", "T");
+						waypointActual=1
+						waypointEnCaptura = -1
+						$("#btnHover").prop("disabled", false);
 					}					
 					console.log('El resultado de reanudarMision:'+result);
 

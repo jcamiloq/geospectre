@@ -33,6 +33,34 @@ parser.add_argument("--connect", dest="conect",help="Puerto por el que se desea 
         #asigna a parser cada elemento en "dest"
 parser.add_argument("--reanudar",dest="reanude",help="Valores necesarios para realizar la reanudacion con el siguiente formato : [LATITUD,LONGITUD,WP_REANUDACION]")
 
+def download_mission():
+    """
+    Downloads the current mission and returns it in a list.
+    It is used in save_mission() to get the file information to save.
+    """
+    print(" Download mission from vehicle")
+    missionlist=[]
+    cmds = vehicle.commands
+    cmds.download()
+    cmds.wait_ready()
+    for cmd in cmds:
+        missionlist.append(cmd)
+    return missionlist
+
+def save_mission():
+    aFileName = "D:/Tesis/Code/Api/Flask/tmp/misioncmd.txt"
+    print("\nSave mission from Vehicle to file: %s" % aFileName)    
+    #Download mission from vehicle
+    missionlist = download_mission()
+    output = ""
+    #Add file-format information
+    for cmd in missionlist:
+        commandline="%s,%s\n" % (cmd.x,cmd.y)
+        output+=commandline
+    with open(aFileName, 'w') as file_:
+        print(" Write mission to file")
+        file_.write(output)
+
 def get_location_metres(original_location, dNorth, dEast):
     """
     Returns a LocationGlobal object containing the latitude/longitude `dNorth` and `dEast` metres from the 
@@ -335,19 +363,42 @@ def capturarVueloDrone(etapa):
 def mision(firstHome):
     global vehicle, remainingWp, flagPausar, flagTerminar, senalCaptura
     remainingWp = []
+    listaComandos = []
     previousWaypoint = 1
     senalCaptura = ""
     while True:
         while capturando:
             print("capturando en misión")
             sleep(2)
-        while necesitaCalibrar:
+            if flagPausar == "T":
+                break
+        if necesitaCalibrar:
             print("Recalibrando Sensores")
             vehicle.mode = VehicleMode("GUIDED")
-            point = LocationGlobalRelative(float(str(vehicle.location.global_relative_frame.lat)),float(str(vehicle.location.global_relative_frame.lon)), altura)
-            if(distance_to_someone_waypoint(point.lat,point.lon)>=0.5):
+            sleep(2)
+            save_mission()
+            waypointActual = vehicle.commands.next -2
+            with open("D:/Tesis/Code/Api/Flask/tmp/misioncmd.txt", "r") as m:
+                for line in m:
+                    listaComandos.append(line)
+            point = listaComandos[waypointActual].split(",")
+            point = LocationGlobalRelative(float(point[0]),float(point[1][0:-2]), altura)
+            # while vehicle.mode.name != "GUIDED":
+            #     vehicle.mode = VehicleMode("GUIDED")
+            #     print("going to guided")
+            #     sleep(0.5)
+            while(distance_to_someone_waypoint(point.lat,point.lon)>=0.5):
+                print("going back")
                 vehicle.simple_goto(point)
-            sleep(1)
+                sleep(1)
+            while necesitaCalibrar:
+                sleep(1)
+                if flagPausar == "T":
+                    break
+            while vehicle.mode.name != "AUTO" and flagPausar != "T":
+                vehicle.mode = VehicleMode("AUTO")
+                print("going to AUTO")
+                sleep(0.5)
         while hover:
             print("Hovering")
             vehicle.mode = VehicleMode("GUIDED")
@@ -355,17 +406,20 @@ def mision(firstHome):
             if(distance_to_someone_waypoint(point.lat,point.lon)>=0.5):
                 vehicle.simple_goto(point)
             sleep(1)
+            if flagPausar == "T":
+                break
         vehicle.mode = VehicleMode("AUTO")
         nextwaypoint=vehicle.commands.next
         if nextwaypoint > previousWaypoint:
             previousWaypoint = nextwaypoint
-            
-            while vehicle.mode.name != "GUIDED":
-                vehicle.mode = VehicleMode("GUIDED")
-                point = LocationGlobalRelative(float(str(vehicle.location.global_relative_frame.lat)),float(str(vehicle.location.global_relative_frame.lon)), altura)
-                if(distance_to_someone_waypoint(point.lat,point.lon)>=0.1):
-                    vehicle.simple_goto(point)
             senalCaptura = "G"
+            sleep(2)
+            # tiempoInicio = time.time()
+            # tiempoFinal = 0
+            # while tiempoFinal<1:
+            #     senalCaptura = "G"
+            #     tiempoFinal = time.time()-tiempoInicio
+            
             while vehicle.mode.name != "AUTO":
                 vehicle.mode = VehicleMode("AUTO")
                 print("going to AUTO")
@@ -390,9 +444,13 @@ def mision(firstHome):
                 remainingWp.append(waypoints[nextwaypoint+i-1])
             print(remainingWp)
             point = LocationGlobalRelative(float(str(vehicle.location.global_relative_frame.lat)),float(str(vehicle.location.global_relative_frame.lon)), altura)
-            if(distance_to_someone_waypoint(point.lat,point.lon)>=1):
-                vehicle.simple_goto(point)
-                sleep(1)
+            # while vehicle.mode.name != "GUIDED":
+            vehicle.mode = VehicleMode("GUIDED")
+            print("going to guided in mission")
+            sleep(0.5)
+            # if(distance_to_someone_waypoint(point.lat,point.lon)>=0.5):
+            #     vehicle.simple_goto(point)
+            #     sleep(1)
             break;
         if (nextwaypoint==int(len(waypoints))+1): #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
             print("Exit 'standard' mission when start heading to final waypoint")
@@ -409,7 +467,7 @@ def pausa():
         while vehicle.mode.name != "GUIDED":
             vehicle.mode = VehicleMode("GUIDED")
             print("going to guided")
-            sleep(1)
+            sleep(0.5)
         pointy = LocationGlobalRelative(float(str(vehicle.home_location.lat)),float(str(vehicle.home_location.lon)), altura)
         vehicle.simple_goto(pointy)
         while True:

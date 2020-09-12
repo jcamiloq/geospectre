@@ -90,7 +90,6 @@ actitudDron = ""
 velocidadDron = ""
 bateriaDron = ""
 
-
 blancoCapturadoLista = []
 negroCapturadoLista = []
 blancoCapturado = []
@@ -108,7 +107,7 @@ listaEspectros = []
 numeroCapturasAsincronas = 0
 intervaloCapturasAsincronas = 0
 numeroWaypoint = 0
-limiteBateria = 50
+limiteBateria = 85
 x = 100 - limiteBateria
 # tiempoAutonomia =  (-4.655*limiteBateria)+375.52
 # tiempoAutonomia = (9*(x**3)/40832)+(585*(x**2)/20416)+(2521*x/638)+(5625/1276) newton interp
@@ -120,6 +119,8 @@ sumaBlanco = 0.0
 sumaCapturado = 0.0
 puntoResume = None
 firstHome = None
+counterH = 0
+
 
 errorCalGlobal = ""
 errorCapturaGlobal = ""
@@ -227,7 +228,7 @@ def calcularDistanciaMetros(waypoints):
         distanceT += distance
         distanceW += distance
 
-        if distanceW/float(velocidad) >= tiempoAutonomia-30:
+        if distanceW/float(velocidad) >= tiempoAutonomia-45:
             puntoPausa.append(str(i+1))
             
             lat1f = float(lat1)
@@ -932,15 +933,18 @@ def iniciarMision():
 @app.route('/hover', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def hover():
-    global counterCal
+    global counterCal, counterH
     data = request.get_json()
     calibrarFlag = data['calibrarFlag']
     print("CAl"+ str(calibrarFlag))
+    if calibrarFlag=="H":
+        counterH +=1
     counterCal += 1
     print(counterCal)
-    print(str(counterCal%2))
-    if calibrarFlag == "H" and counterCal%2 == 0:
+    print(counterH)
+    if calibrarFlag == "H" and counterCal%2 == 0 and counterH < 2:
         data["volverCapturar"] = "T"
+        counterH = 0
     if counterCal%2 == 0:
         calibrarFlag = "F"
     # ----------------------------------LLAMADO A DRONE.PY------------------------------
@@ -971,10 +975,13 @@ def pausarMision():
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def reanudarMision():
     data = request.get_json()
-    # flagPausar = data['flagPausar']
+    # flagPausar = data['flagPausar'] 
     try:
+        print(str(puntoResume))
     # ----------------------------------LLAMADO A DRONE.PY------------------------------
         if puntoResume == None:
+            errorDespegue = estadoResume(remainingWp, firstHome)
+        elif puntoResume[0] == "[]":
             errorDespegue = estadoResume(remainingWp, firstHome)
         else:
             errorDespegue = estadoResume(remainingWp, firstHome, float(puntoResume[0]), float(puntoResume[1]))
@@ -1188,9 +1195,10 @@ def guardarEspectro():
     waypointSeleccionado = data['waypointSeleccionado']
     ruta = str(data['ruta'])
     usuario = str(data['usuario'])
-    print(waypointSeleccionado)
+    print(ruta)
+    filePath = FileManagement.to_relative(ruta)
     try:
-        if os.path.isdir(ruta):
+        if os.path.isdir(filePath):
             conn = conexion()
             daoMision = DaoMision(conn)
             mision = daoMision.getMisionNombre(nombreMisionCrear)
@@ -1210,11 +1218,12 @@ def guardarEspectro():
             espectro = daoEspectros.getEspectros(idEspectro)
             resultado = espectro.resultado
             conn.close()
-            ruta += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "Waypoint("+waypointSeleccionado+")"
-            filePath = FileManagement.to_relative(ruta)
-            # print(ruta)
+            filePath += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "Waypoint("+waypointSeleccionado+")"
+            
+            print(filePath)
             generate(resultado, filePath, float(latlon[0]), float(latlon[1]), altura)
         else:
+            print("no existe ruta")
             data['errorCarpeta'] = "T"
     except Exception as errorBd:
         data['errorBd'] = "T"
@@ -1228,9 +1237,10 @@ def guardarTodos():
     data['errorBd'] = ""
     nombreMisionCrear = data['nombreMisionCrear']
     ruta = str(data['ruta'])
+    filePath = FileManagement.to_relative(ruta)
     usuario = str(data['usuario'])
     try:
-        if os.path.isdir(ruta):
+        if os.path.isdir(filePath):
             data['errorCarpeta'] = ""
             idsWaypoints = []
             idsEspectros = []
@@ -1256,14 +1266,14 @@ def guardarTodos():
 
             for i in range(0, len(idsEspectros)):
                 latlons = latlonsWaypoints[i].split(",")
-                rutaG = ruta
+                rutaG = filePath
                 daoEspectros = DaoEspectros(conn)
                 espectro = daoEspectros.getEspectros(idsEspectros[i])
                 resultado = espectro.resultado
                 rutaG += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "WaypointNumber("+str(i)+")"
-                filePath = FileManagement.to_relative(rutaG)
+                # filePath = FileManagement.to_relative(rutaG)
                 print(rutaG)
-                generate(resultado, filePath, float(latlons[0]), float(latlons[1]), altura)
+                generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), altura)
 
                 # generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), 5)
             conn.close()

@@ -242,8 +242,9 @@ def makeImageG(ejeYMakeImage, rutaImagen, lat, lon, alt):
     plt.cla()
     plt.clf()
     plt.close()
+    rel_path = '/testy/base.jpg'
     filePath = FileManagement.to_relative(rel_path)
-    piexif.transplant('/testy/base.jpg', rutaImagen)
+    piexif.transplant(filePath, rutaImagen)
     set_gps_location(rutaImagen, lat, lon, alt)
     return resultadoMakeImage
 
@@ -252,7 +253,7 @@ def generate(lista, rutaz, lat, lon, alt, veces=1):
         ruta = rutaz +"%s.txt" %(i)
         rutaImagen = rutaz+"%s.jpg" %(i)
         appendFile = open(ruta, 'w')
-        appendFile.write("")
+        appendFile.write("Wavelenght\t\tIntensity\n")
         appendFile.close()
         d = []
         for j in range(0, len(wavelenghtsLista)):
@@ -263,6 +264,7 @@ def generate(lista, rutaz, lat, lon, alt, veces=1):
             # else:
             d.append(float(lista[j]))
             appendFile = open(ruta, 'a')
+            appendFile.write(str(wavelenghtsLista[j]) + "\t\t")
             appendFile.write(str(d[j]) + "\n")
             appendFile.close()
 
