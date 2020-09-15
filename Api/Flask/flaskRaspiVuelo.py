@@ -83,7 +83,7 @@ def sensoresVuelo(sensorVueloVIS, sensorVueloNIR, tiempoIntegracion, numeroCaptu
             start_time_A = time.time()
             # x = "D:/subtext/splitTest0/Quieto 1 feb/cult2/2mt0.txt"
             # D:\Tesis\Api\Flask\testy\cult2
-            if counter > 7:
+            if counter > 6:
                 counter = 0
             x = "/testy/cult2/inten%s.txt" %(counter)
             file_path = FileManagement.to_relative(x)

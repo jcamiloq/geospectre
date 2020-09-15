@@ -616,6 +616,7 @@ def guardarBlanco():
     try:
         copyfile(filePathSrc, filePathDes)
         if id_espectros == None:
+            print(a)
             conn = conexion()
             espectro = Espectros()
             espectro.white = a

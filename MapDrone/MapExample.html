@@ -1043,14 +1043,14 @@
 			});
 
 			
-			var tab2 = document.getElementById("profile-tab");
-  			tab2.classList.add("disabled");
+			// var tab2 = document.getElementById("profile-tab");
+  	// 		tab2.classList.add("disabled");
 
-  			var tab3 = document.getElementById("profile-tab1");
-  			tab3.classList.add("disabled");
+  	// 		var tab3 = document.getElementById("profile-tab1");
+  	// 		tab3.classList.add("disabled");
 
-  			// var tab4 = document.getElementById("profile-tab2");
-  			// tab4.classList.add("disabled");
+  	// 		var tab4 = document.getElementById("profile-tab2");
+  	// 		tab4.classList.add("disabled");
 
   			// var tab5 = document.getElementById("profile-tab3");
   			// tab5.classList.add("disabled");
@@ -1389,6 +1389,8 @@
 								$("#btnConectar").prop("disabled", false);
 							}						
 							console.log('El resultado de crearmision:'+ info);
+							var element = document.getElementById("profile-tab");
+		  					element.classList.remove("disabled");
 
 
 						},
@@ -1604,6 +1606,7 @@
 								if(flagTerminar == "T"){
 									$("#btnPausar").prop("disabled", true);
 									$("#btnReanudar").prop("disabled", true);
+									$("#btnHover").prop("disabled", true);
 									if(miStorage.getItem("counterTerminar")== "0" && miStorage.getItem("terminarShown") != "T"){
 										SoftNotification.show("Recorrido Terminado, yendo a home", "success");
 										$("#labelIrradancia").html("");
@@ -1657,6 +1660,8 @@
 											if(paused == "T"){
 												$("#btnReanudar").prop("disabled", false);
 												$("#btnDetener").prop("disabled", false);
+												$("#btnHover").prop("disabled", true);
+												$("#btnArmar").prop("disabled", true);
 												SoftNotification.show("Misión en pausa", "success")
 											}
 										}
@@ -1952,6 +1957,8 @@
 			// $("#waypointsTextArea").val("");
 			$("#btnGuardarWaypoints").prop("disabled", true);
 			nombreMisionCrear = miStorage.getItem("nombreMisionCrear")
+			velocidad = miStorage.getItem("velocidad")
+			console.log(velocidad)
 			var resultado = guardarWaypointsTexto();
 			var trimError = resultado[0];
 			var wps = resultado[1];
@@ -1962,7 +1969,7 @@
 					type: "POST",
 					dataType: "json",
 					contentType: 'application/json;charset=UTF-8',
-					data: JSON.stringify({"waypoints": wps, "nombreMisionCrear": nombreMisionCrear}),
+					data: JSON.stringify({"velocidad": velocidad, "waypoints": wps, "nombreMisionCrear": nombreMisionCrear}),
 					async: true,
 					success: function(result){
 						var info = result;

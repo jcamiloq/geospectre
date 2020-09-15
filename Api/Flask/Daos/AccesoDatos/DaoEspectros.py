@@ -7,7 +7,6 @@ class DaoEspectros:
     def guardarEspectros(self, espectros):
         sql_guardar = "INSERT INTO espectros (white, dark, capturado, resultado, sensores_id) VALUES "
         sql_guardar += "(%s, %s, %s, %s, %s) RETURNING *"
-
         try:
             cursor = self.conexion.cursor()
             cursor.execute(
@@ -17,14 +16,16 @@ class DaoEspectros:
                     espectros.resultado,espectros.sensores_id 
                 ) 
             )
+
             result = cursor.fetchone()
             self.conexion.commit()
             cursor.close()
             espectros.id = result[0]
+            print("Espectro guardado con éxito")
             return espectros
             
         except(Exception) as e:
-            print("Error al insertar registro", e)
+            print("Error al guardar espectro", e)
             return None
 
     def actualizarEspectros(self, espectros):
@@ -50,7 +51,7 @@ class DaoEspectros:
             return espectros
             
         except(Exception) as e:
-            print("Error al actualizar el espectros", e)
+            print("Error al actualizar el espectro", e)
         return None
 
 
@@ -113,7 +114,7 @@ class DaoEspectros:
             return result
 
         except(Exception) as e:
-            print("Error al actualizar el usuario", e)
+            print("Error al retornar el espectro", e)
             result = None
         
         finally:

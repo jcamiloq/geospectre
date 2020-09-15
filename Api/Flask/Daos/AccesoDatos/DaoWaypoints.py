@@ -141,7 +141,7 @@ class DaoWaypoints:
             cursor = self.conexion.cursor()
             cursor.execute(sql_select)
             record = cursor.fetchall()
-            print(record)
+            # print(record)
             for i in range (0, len(record)):
                 result = Waypoints()
                 result.id = record[i][0]
@@ -150,7 +150,6 @@ class DaoWaypoints:
                 result.mision_id = record[i][3]
                 objetos.append(result)
             cursor.close()
-            print(objetos)
             return objetos
 
         except(Exception) as e:

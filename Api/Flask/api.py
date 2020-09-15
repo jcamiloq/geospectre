@@ -23,6 +23,11 @@ import numpy as np
 import base64
 import time
 from shutil import copyfile
+from math import sin, cos, sqrt, atan2, radians
+import queue
+from threading import Thread
+
+# ----------------IMPORT DAO-----------------------------
 from Daos.Conexion import *
 from Daos.AccesoDatos.DaoUsuarios import DaoUsuarios
 from Daos.AccesoDatos.Logica.Usuarios import Usuarios
@@ -44,23 +49,18 @@ from Daos.AccesoDatos.Logica.Espectros import Espectros
 
 from Daos.AccesoDatos.DaoEspway import DaoEspway
 from Daos.AccesoDatos.Logica.Espway import Espway
-
-from math import sin, cos, sqrt, atan2, radians
-import queue
-from threading import Thread
-
-from file_management import FileManagement
-
-app = Flask(__name__)
-
-sitl = None
-
-###########################################################################
+# -------------------------------------------------------
+#------------------IMPORT MANAGEMENT--------------------
 from user_management import UserManagemet
 from mision_management import MisionManagement
 from drone_management import DroneManagement
+from spectre_management import SpectreManagement
+from api_info import WaypointInfo, SpectreInfo, SensorInfo
+from file_management import FileManagement
+#-------------------------------------------------------
 
-###########################################################################
+app = Flask(__name__)
+sitl = None
 CORS(app, resources={r"/login":{"origins":"*"},
     r"/hover":{"origins":"*"},
     r"/registro":{"origins":"*"},
@@ -82,55 +82,23 @@ CORS(app, resources={r"/login":{"origins":"*"},
 app.config['SECRET_KEY'] = 'the quick brown fox jumps over the lazy   dog'
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-waypoints = []
-elevacion = 0 
-id_usuario_activo = ""
-posicionDron = ""  
-actitudDron = "" 
-velocidadDron = ""
-bateriaDron = ""
-
-blancoCapturadoLista = []
-negroCapturadoLista = []
-blancoCapturado = []
-negroCapturado = []
-arrayWaypoints = ""
-aux = ""
-id_espectros= None
-id_waypoints= None
-ids = ""
-waypoint = []
-idCapturados = []
-idCapturadosLista = []
-caracterWaypoints = []
-listaEspectros = []
-numeroCapturasAsincronas = 0
-intervaloCapturasAsincronas = 0
-numeroWaypoint = 0
 limiteBateria = 85
-x = 100 - limiteBateria
-# tiempoAutonomia =  (-4.655*limiteBateria)+375.52
-# tiempoAutonomia = (9*(x**3)/40832)+(585*(x**2)/20416)+(2521*x/638)+(5625/1276) newton interp
-tiempoAutonomia = 939.6593 + (24.08848-939.6593)/(1+ (x/88.07215)**1.896207)
-print(tiempoAutonomia)
-# tiempoAutonomia =  (100-limiteBateria)*4.3 #tiempo autonomia total aprox 450s
-counterCal = 2
-sumaBlanco = 0.0
-sumaCapturado = 0.0
-puntoResume = None
-firstHome = None
-counterH = 0
 
+valores_waypoints = WaypointInfo()
+valores_espectros = SpectreInfo()
+valores_sensores = SensorInfo()
 
-errorCalGlobal = ""
-errorCapturaGlobal = ""
-errorBdGlobal = ""
-
+def calcularAutonomia(limiteBateria):
+    x = 100 - limiteBateria
+    # tiempoAutonomia =  (-4.655*limiteBateria)+375.52
+    # tiempoAutonomia = (9*(x**3)/40832)+(585*(x**2)/20416)+(2521*x/638)+(5625/1276) newton interp
+    tiempoAutonomia = 939.6593 + (24.08848-939.6593)/(1+ (x/88.07215)**1.896207)
+    print(tiempoAutonomia)
+    # tiempoAutonomia =  (100-limiteBateria)*4.3 #tiempo autonomia total aprox 450s
+    return tiempoAutonomia
+     
 def capturaVueloApi(a, n, data, i): #i para prueba, generar varias imágenes de la captura asíncrona
-    global listaEspectros
-
     id_waypoints = waypointsDB(data['nombreMisionCrear'])
-
     conn = conexion()
     daoEspectros = DaoEspectros(conn)
     espectro = Espectros()
@@ -138,12 +106,11 @@ def capturaVueloApi(a, n, data, i): #i para prueba, generar varias imágenes de 
     espectro.dark = n
     espectro.capturado = []
     espectro.resultado = []
-    espectro.sensores_id = idSensorVueloVIS
+    espectro.sensores_id = valores_sensores.idSensorVueloVIS
     espectro = daoEspectros.guardarEspectros(espectro)
     id_espectroV = espectro.id
 
-    c, d, e, f, sumaCapturado= capturarVueloSinc(data['sensorVueloNIR'], data['sensorVueloVIS'], data['tiempoIntegracion'], data['numeroCapturas'], id_espectroV, i)
-    listaEspectros.append(id_espectroV)
+    c, d, e, f, valores_sensores.sumaCapturado= capturarVueloSinc(data['sensorVueloNIR'], data['sensorVueloVIS'], data['tiempoIntegracion'], data['numeroCapturas'], id_espectroV, i)
 
     daoEspway = DaoEspway(conn)
     espway = Espway()
@@ -152,11 +119,10 @@ def capturaVueloApi(a, n, data, i): #i para prueba, generar varias imágenes de 
     espway = daoEspway.guardarEspway(espway)
 
     conn.close()
-    return data, c, d, f, sumaCapturado
+    return data, c, d, f, valores_sensores.sumaCapturado
 
 def waypointsDB(nombreMisionCrear):
-    global id_waypointsList, numeroWaypoint
-    latlon = lat + "," + lon
+    latlon = valores_waypoints.lat + "," + valores_waypoints.lon
     print(latlon)
     conn = conexion()
     daoMision = DaoMision(conn)
@@ -165,19 +131,20 @@ def waypointsDB(nombreMisionCrear):
     mision = daoMision.getMisionNombre(nombreMisionCrear)
     idMision = mision.id
     wayp = Waypoints()
-    wayp.num_waypoint = numeroWaypoint
+    wayp.num_waypoint = valores_waypoints.numeroWaypoint
     wayp.latlon = latlon
     wayp.mision_id = idMision
     wayp = daoWaypoints.guardarWaypoint(wayp)
     id_waypoints = wayp.id
 
-    id_waypointsList.append(id_waypoints)
+    valores_waypoints.id_waypointsList.append(id_waypoints)
 
     conn.close()
-    numeroWaypoint += 1
+    valores_waypoints.numeroWaypoint += 1
     return id_waypoints
 
-def calcularDistanciaMetros(waypoints):
+def calcularDistanciaMetros(waypoints, velocidad):
+    tiempoAutonomia = calcularAutonomia(limiteBateria)
     # ----Tiempo Autonomía
     # T= potencia_bateria/consumo
     # 
@@ -242,26 +209,25 @@ def calcularDistanciaMetros(waypoints):
             distanceW = 0
     # print(puntoMedio)
     print("Result:", distanceT, "metres")
-    return distanceT, puntoPausa, puntoMedio
+    return puntoPausa, puntoMedio
 
 def capturaContinua(numeroCapturasAsincronas, intervaloCapturasAsincronas, a, n, data, i):
-    global errorCalGlobal, errorCapturaGlobal, errorBdGlobal, sumaCapturado, enCapturaContinua
     tiempo = 100
-    enCapturaContinua = "T"
+    valores_sensores.enCapturaContinua = "T"
     while i<numeroCapturasAsincronas:
         # print("al inicio i:%s" %(i))
         if tiempo >= intervaloCapturasAsincronas:
             start_time_A = time.time()
             # time.sleep(1)
-            data, c, d, f, sumaCapturado= capturaVueloApi(a, n, data, i)
+            data, c, d, f, valores_sensores.sumaCapturado= capturaVueloApi(a, n, data, i)
             if f == "T":
-                errorCalGlobal = "T"
+                valores_sensores.errorCalGlobal = "T"
                 data['errorCal'] = "T"
             if c == "T":
-                errorCapturaGlobal = "T"
+                valores_sensores.errorCapturaGlobal = "T"
                 data['errorCapturaV'] = "T"
             if d =="T":
-                errorBdGlobal = "T"
+                valores_sensores.errorBdGlobal = "T"
                 data['errorBd'] = "T"
             print(c +" " + d)
             # print("dentro del if tiempo:%s" %(i))
@@ -272,13 +238,13 @@ def capturaContinua(numeroCapturasAsincronas, intervaloCapturasAsincronas, a, n,
             # print("dentro del else i:%s" %(i))
         end_time_A = time.time()
         tiempo = end_time_A - start_time_A
-    enCapturaContinua = "F"
+    valores_sensores.enCapturaContinua = "F"
         # print("tiempo:%s" %(i))
         
     # -------Llamado a Drone.py----------
     capturarVueloDrone("B")
     # -----------------------------------
-    return data, sumaCapturado
+    return data, valores_sensores.sumaCapturado
 
 @app.route('/login', methods=['POST'])
 # @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -292,7 +258,6 @@ def login():
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def registro():
     data = request.get_json()
-    
     nombreUsuario= data["nombreUsuario"]
     password= data["password"]
     return UserManagemet.registro(nombreUsuario, password)
@@ -300,10 +265,9 @@ def registro():
 @app.route('/crearMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def crearMision():
-    global velocidad, id_espectros, firstHome, numeroWaypoint
-    numeroWaypoint = 0
-    firstHome = None
-    id_espectros = None
+    valores_waypoints.numeroWaypoint = 0
+    valores_waypoints.firstHome = None
+    valores_espectros.id_espectros = None
     data = request.get_json()
     data['errorBd'] = ""
     nombreUsuario = data["nombreUsuario"]
@@ -315,9 +279,9 @@ def crearMision():
 
     drone = DroneManagement()
     drone.velocidad = velocidad
-    drone.id_espectros = id_espectros
-    drone.firstHome = firstHome
-    drone.numeroWaypoint = numeroWaypoint
+    drone.id_espectros = valores_espectros.id_espectros
+    drone.firstHome = valores_waypoints.firstHome
+    drone.numeroWaypoint = valores_waypoints.numeroWaypoint
 
     print("nombremision = " + nombreMisionCrear + " " + "elevacion = " + elevacion + " " + "velocidad = " + velocidad + " " + "modoVuelo = " + modo_vuelo + " " + "Modo de Adquisicion =" + modo_adq)
     return MisionManagement.crearMision(
@@ -327,27 +291,24 @@ def crearMision():
 @app.route('/conectarDron', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def conectarDron():
-    global altura, firstHome
     data = request.get_json()
     data['errorDrone'] = ""
     conectarDron = data["conectarDron"]
-    
     if conectarDron:
         try:
             altura = float(data["elevacion"])
             velocidad = float(data["velocidad"])
             # ------------------------LLAMADO A DRONE.PY-------------------------
-            # -------------------------------------------------------------------
             FH = initCon(altura, velocidad)
             # -------------------------------------------------------------------
-            # -------------------------------------------------------------------
-            if firstHome == None or firstHome == "":
-                firstHome = FH
+            if valores_waypoints.firstHome == None or valores_waypoints.firstHome == "":
+                valores_waypoints.firstHome = FH
         except Exception as e:
             data['errorDrone'] = "T"
-            print("error en Dron")
+            print("error en conectarDron: ", e)
             raise e
-        pass
+        finally:
+            return json.dumps(data)
     else:
         # llamar funcion de desconexiòn en drone
         try:
@@ -355,24 +316,21 @@ def conectarDron():
             print("simulador off")
         except:
             print("no vehicle")
-    print(data.get('errorDrone'))
-    return json.dumps(data)
+        finally:
+            return json.dumps(data)
 
 @app.route('/obtenerTelemetria', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def obtenerTelemetria():
-    global waypointActual, lat, lon
     data = request.get_json()
     nombreMisionCrear = data["nombreMisionCrear"]
-    # flagPausar = data["flagPausar"]
-    # flagDetener = data["flagDetener"]
-    # flagReanudar = data["flagReanudar"]
     data = {}
     data['errorBd'] = ""
     # ------------------LLAMADA A DRONE.PY---------------
     dicTelem = telem()
+    # ---------------------------------------------------
     posicionDron = str(dicTelem["posicionDron"])
-    waypointActual = dicTelem["waypointActual"]
+    valores_waypoints.waypointActual = dicTelem["waypointActual"]
     actitudDron = str(dicTelem["actitudDron"])
     velocidadDron = str(dicTelem["velocidadDron"])[0:4]
     bateriaDron = str(dicTelem["bateriaDron"])
@@ -382,18 +340,13 @@ def obtenerTelemetria():
     dronConectado = dicTelem["dronConectado"]
     capturando = dicTelem["capturando"]
     flagTerminar = dicTelem["flagTerminar"]
-    # ---------------------------------------------------
+
     posicionDron = posicionDron.split(":")[1]
     posicionDron = posicionDron.split(",")
-    lat = posicionDron[0].split("=")[1]
-    lon = posicionDron[1].split("=")[1]
+    valores_waypoints.lat = posicionDron[0].split("=")[1]
+    valores_waypoints.lon = posicionDron[1].split("=")[1]
     alt = posicionDron[2].split("=")[1]
     print('Position: %s'% posicionDron)
-    print("Armado? " + armado)
-    # print('Position: %s'% vehicle.location.global_relative_frame)
-    # print(lat)
-    # print(lon)
-    # print(alt)
 
     #- Read the actual attitude roll, pitch, yaw
     actitudDron = actitudDron.split(":")[1]
@@ -401,18 +354,7 @@ def obtenerTelemetria():
     pitch = round(float(actitudDron[0].split("=")[1]), 5)
     yaw = round(float(actitudDron[1].split("=")[1]), 5)
     roll = round(float(actitudDron[2].split("=")[1].upper()), 5)
-    # print(pitch)
-    # print(yaw)
-    # print(roll)
-
-    #- Read the actual velocity (m/s)
-    # print('Velocity: %s'% velocidadDron)
-    # print(velocidadDron)
-
     bateriaDron = bateriaDron.split("=")[3]
-    # print('Battery: %s'%bateriaDron)
-    # print(bateriaDron)
-    # print(h)
     if int(batteryLevel) <= limiteBateria:
         data['flagBatt'] = "T"
     try:
@@ -424,8 +366,8 @@ def obtenerTelemetria():
         telemetria.pitch = pitch
         telemetria.yaw = yaw
         telemetria.roll = roll
-        telemetria.lat = lat
-        telemetria.lon = lon
+        telemetria.lat = valores_waypoints.lat
+        telemetria.lon = valores_waypoints.lon
         telemetria.alt = alt
         telemetria.bateriaDron = bateriaDron
         telemetria.velocidadDron = velocidadDron
@@ -438,10 +380,9 @@ def obtenerTelemetria():
         data['errorBd'] = "T"
         print("error en BD")
         return json.dumps(data)
-    # print(data.get('errorBd'))
 
-    data['lat'] = lat
-    data['lon'] = lon
+    data['lat'] = valores_waypoints.lat
+    data['lon'] = valores_waypoints.lon
     data['alt'] = alt
     data['pitch'] = pitch
     data['yaw'] = yaw
@@ -450,15 +391,15 @@ def obtenerTelemetria():
     data['bateriaDron'] = bateriaDron
 
     data['senalCaptura'] = senalCaptura
-    data['waypActual'] = waypointActual
+    data['waypActual'] = valores_waypoints.waypointActual
     data['armado'] = armado
     data['conectado']= dronConectado
     data['capturando']= capturando
     data['flagTerminar'] = flagTerminar
 
-    if(sumaBlanco != 0.0):
-        if(sumaCapturado != 0.0):
-            porcentageIrr = round(sumaCapturado*100/sumaBlanco, 2)
+    if(valores_sensores.sumaBlanco != 0.0):
+        if(valores_sensores.sumaCapturado != 0.0):
+            porcentageIrr = round(valores_sensores.sumaCapturado*100/valores_sensores.sumaBlanco, 2)
             porcentageIrr = str(porcentageIrr)
             data['porcentageIrr'] = str(porcentageIrr)+"%"
         else:
@@ -466,10 +407,10 @@ def obtenerTelemetria():
     else:
         data['porcentageIrr'] = "Indef"
     try:
-        data['errorBdCapturaContinua'] = errorBdGlobal
-        data['errorCalCapturaContinua'] = errorCalGlobal
-        data['errorCapturaContinua'] = errorCapturaGlobal
-        data['enCapturaContinua'] = enCapturaContinua
+        data['errorBdCapturaContinua'] = valores_sensores.errorBdGlobal
+        data['errorCalCapturaContinua'] = valores_sensores.errorCalGlobal
+        data['errorCapturaContinua'] = valores_sensores.errorCapturaGlobal
+        data['enCapturaContinua'] = valores_sensores.enCapturaContinua
     except Exception as e:
         return json.dumps(data)
         raise e
@@ -480,7 +421,6 @@ def obtenerTelemetria():
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def calibrarSensores():
     #la calibración de todos los sensores es simultanea para tener concordancia de datos
-    global idSensorTierraVIS, idSensorTierraNIR, idSensorVueloVIS, idSensorVueloNIR
     data = request.get_json()
     data['errorBd'] = ""
     data['errorCalibrarSensoresTierra'] = ""
@@ -530,7 +470,7 @@ def calibrarSensores():
         sensorTV.mision_id = idMision
         daoSensores = DaoSensores(conn)
         sensorTV = daoSensores.guardarSensores(sensorTV)
-        idSensorTierraVIS = sensorTV.id
+        valores_sensores.idSensorTierraVIS = sensorTV.id
         
         sensorTN = Sensores()
         sensorTN.lugar = "T"
@@ -540,7 +480,7 @@ def calibrarSensores():
         sensorTN.numero_capt = numeroCapturas
         sensorTN.mision_id = idMision
         sensorTN = daoSensores.guardarSensores(sensorTN)
-        idSensorTierraNIR = sensorTN.id
+        valores_sensores.idSensorTierraNIR = sensorTN.id
 
         sensorVV = Sensores()
         sensorVV.lugar = "V"
@@ -550,7 +490,7 @@ def calibrarSensores():
         sensorVV.numero_capt = numeroCapturas
         sensorVV.mision_id = idMision
         sensorVV = daoSensores.guardarSensores(sensorVV)
-        idSensorVueloVIS = sensorVV.id
+        valores_sensores.idSensorVueloVIS = sensorVV.id
 
         sensorVN = Sensores()
         sensorVN.lugar = "V"
@@ -560,7 +500,7 @@ def calibrarSensores():
         sensorVN.numero_capt = numeroCapturas
         sensorVN.mision_id = idMision
         sensorVN = daoSensores.guardarSensores(sensorVN)
-        idSensorVueloNIR = sensorVN.id
+        valores_sensores.idSensorVueloNIR = sensorVN.id
         conn.close()
 
     except Exception as errorBdCal:
@@ -574,8 +514,8 @@ def calibrarSensores():
 @app.route('/capturarBlanco', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def capturarBlanco():
-    global a, sumaBlanco
-    sumaBlanco = 0
+    valores_sensores.sumaBlanco = 0
+    blancoCapturado = []
     # obtener datos del json
     data = request.get_json()
     data['errorBd'] = ""
@@ -596,12 +536,12 @@ def capturarBlanco():
         # Comandar sensores para captura
         blancoCapturado = capturarBlancoRpi(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas)
         # construir imagen
-        a= getFilesBlanco(blancoCapturado)
-        for i in range(0, len(a)):
-            sumaBlanco += float(a[i])
-        print("limiteCalibracion = " + str(sumaBlanco))
+        valores_espectros.espectroBlanco= getFilesBlanco(blancoCapturado)
+        for i in range(0, len(valores_espectros.espectroBlanco)):
+            valores_sensores.sumaBlanco += float(valores_espectros.espectroBlanco[i])
+        print("limiteCalibracion = " + str(valores_sensores.sumaBlanco))
         # print(a)
-        makeImageW(a)
+        makeImageW(valores_espectros.espectroBlanco)
         rel_path = "/tmp/imagenEspectroW.png"
         filePath = FileManagement.to_relative(rel_path)
         with open(filePath, "rb") as image_file:
@@ -619,7 +559,6 @@ def capturarBlanco():
 @app.route('/capturarNegro', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def capturarNegro():
-    global n
     data = request.get_json()
     data['errorBd'] = ""
     data['errorCapturaN'] = ""
@@ -631,14 +570,15 @@ def capturarNegro():
     numeroCapturas = data["numeroCapturas"]
     rel_path = '/tmp/archivoTemporalNegro.txt';
     filePath = FileManagement.to_relative(rel_path)
+    negroCapturado = []
     if os.path.exists(filePath):
         os.remove(filePath)
     else:
         print("Can not delete the file as it doesn't exists")
     try:
         negroCapturado = capturarNegroRpi(sensorTierraVIS, sensorTierraNIR, tiempoIntegracion, numeroCapturas)
-        n= getFilesNegro(negroCapturado)
-        makeImageD(n)
+        valores_espectros.espectroNegro= getFilesNegro(negroCapturado)
+        makeImageD(valores_espectros.espectroNegro)
         rel_path = "/tmp/imagenEspectroD.png"
         filePath = FileManagement.to_relative(rel_path)
         with open(filePath, "rb") as image_file:
@@ -654,7 +594,6 @@ def capturarNegro():
 @app.route('/guardarBlanco', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def guardarBlanco():
-    global idSensorTierraVIS, id_espectros, a
     data = request.get_json()
     data['errorBd'] = ""
     relPathSrc = '/tmp/archivoTemporalBlanco.txt';
@@ -663,38 +602,11 @@ def guardarBlanco():
     filePathDes = FileManagement.to_relative(relPathDes)
     try:
         copyfile(filePathSrc, filePathDes)
-        if id_espectros == None:
-            conn = conexion()
-            espectro = Espectros()
-            espectro.white = a
-            espectro.dark = []
-            espectro.capturado = []
-            espectro.resultado = []
-            espectro.sensores_id = idSensorTierraVIS
-
-            daoEspectros = DaoEspectros(conn)
-            espectro = daoEspectros.guardarEspectros(espectro)
-            id_espectros = espectro.id
-            print(id_espectros)
-            conn.close()
-        else:
-            print("else blanco")
-            conn = conexion()
-            daoEspectros = DaoEspectros(conn)
-            espectro = daoEspectros.getEspectros(id_espectros)
-            espectro.white = a
-            espectro = daoEspectros.actualizarEspectros(espectro)
-            conn.close()
-            # conn = psycopg2.connect(host="localhost", port = 5432, database="geospectre", user="postgres", password="kmiikiintero050K")
-            # cur = conn.cursor()
-            # cur.execute("""UPDATE espectros SET white=%s WHERE id=%s;""", ([a], id_espectros))
-            # # id_espectros = cur.fetchone()[0]
-            # # print(id_espectros)
-            # conn.commit()
-            # cur.close()
-            # conn.close()
+        print(valores_espectros.espectroBlanco)
+        SpectreManagement.guardarBlanco(valores_espectros.id_espectros, valores_espectros.espectroBlanco, [], [], [], valores_sensores.idSensorTierraVIS)
     except Exception as errorBd:
         data['errorBd'] = "T"
+        print("Error de DB en guardarBlanco: ", errorBd)
         return json.dumps(data)
         raise errorBd
     return json.dumps(data)
@@ -702,7 +614,6 @@ def guardarBlanco():
 @app.route('/guardarNegro', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def guardarNegro():
-    global id_espectros, n, idSensorTierraVIS
     data = request.get_json()
     data['errorBd'] = ""
     relPathSrc = '/tmp/archivoTemporalNegro.txt';
@@ -711,44 +622,7 @@ def guardarNegro():
     filePathDes = FileManagement.to_relative(relPathDes)
     try:
         copyfile(filePathSrc, filePathDes)
-        if id_espectros == None:
-            conn = conexion()
-            espectro = Espectros()
-            espectro.white = []
-            espectro.capturado = []
-            espectro.resultado = []
-            espectro.dark = n
-            espectro.sensores_id = idSensorTierraVIS
-            daoEspectros = DaoEspectros(conn)
-            espectro = daoEspectros.guardarEspectros(espectro)
-            id_espectros = espectro.id
-            conn.close()
-
-
-            # conn = psycopg2.connect(host="localhost", port = 5432, database="geospectre", user="postgres", password="kmiikiintero050K")
-            # cur = conn.cursor()
-            # cur.execute("""INSERT INTO espectros (dark, sensores_id) 
-            #     VALUES (%s, %s) RETURNING id;""", ([n], idSensorTierraVIS))
-            # id_espectros = cur.fetchone()[0]
-            # conn.commit()
-            # cur.close()
-            # conn.close()
-        else:
-            conn = conexion()
-            daoEspectros = DaoEspectros(conn)
-            espectro = daoEspectros.getEspectros(id_espectros)
-            espectro.dark = n
-            espectro = daoEspectros.actualizarEspectros(espectro)
-            conn.close()
-
-            # conn = psycopg2.connect(host="localhost", port = 5432, database="geospectre", user="postgres", password="kmiikiintero050K")
-            # cur = conn.cursor()
-            # cur.execute("""UPDATE espectros SET dark=%s WHERE id=%s;""", ([n], id_espectros))
-            # # id_espectros = cur.fetchone()[0]
-            # # print(id_espectros)
-            # conn.commit()
-            # cur.close()
-            # conn.close()
+        SpectreManagement.guardarNegro(valores_espectros.id_espectros, [], valores_espectros.espectroNegro, [], [], valores_sensores.idSensorTierraVIS)
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
@@ -757,140 +631,71 @@ def guardarNegro():
 @app.route('/capturarVuelo', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def capturarVuelo():
-    global a, n, v, id_espectros, sumaCapturado
     # obtener datos del json
     data = request.get_json()
-    sinc= data["caracterSinc"]
-    data['errorBd'] = ""
-    data['errorCapturaV'] = ""
-    numeroCapturasAsincronas = int(data["numeroCapturasAsincronas"])
-    intervaloCapturasAsincronas = int(data["intervaloCapturasAsincronas"])
-    print("numeroCapturasAsincronas"+str(numeroCapturasAsincronas))
-    print("intervalo"+str(intervaloCapturasAsincronas))
     # -------Llamado a Drone.py----------
     capturarVueloDrone("A")
     # -----------------------------------
-    i=0
-    tiempo = 100
-    data['errorCal'] = "F"
-    data['errorCapturaV'] = "F"
-    data['errorBd'] = "F"
     try:
-        if sinc == 2: #PARA CAPTURA POR WAYPOINTS
-            data, c, d, f, sumaCapturado= capturaVueloApi(a, n, data, i)
-            if f == "T":
-                # print("capturarVuelo")
-                data['errorCal'] = "T"
-            if c == "T":
-                data['errorCapturaV'] = "T"
-            if d =="T":
-                data['errorBd'] = "T"
-            print(c +" " + d)
+        if data["caracterSinc"] == 2: #PARA CAPTURA POR WAYPOINTS
+            data, c, d, f, valores_sensores.sumaCapturado = capturaVueloApi(valores_espectros.espectroBlanco, valores_espectros.espectroNegro, data, 0)
+            data['errorCal'] = "T" if f=="T" else "F"
+            data['errorCapturaV'] = "T" if c=="T" else "F"
+            data['errorBd'] = "T" if d=="T" else "F"
+            # -------Llamado a Drone.py----------
             capturarVueloDrone("B")
-            # a = capturarVueloSinc(sensorVueloNIR, sensorVueloVIS, tiempoIntegracion, numeroCapturas, id_espectros) 
         else:
-            t3 =threading.Thread(target = capturaContinua, args= (numeroCapturasAsincronas, intervaloCapturasAsincronas, a, n, data, i))
+            t3 =threading.Thread(
+                target = capturaContinua, 
+                args= (int(data["numeroCapturasAsincronas"]), int(data["intervaloCapturasAsincronas"]), valores_espectros.espectroBlanco, valores_espectros.espectroNegro, data, 0)
+            )
             t3.setDaemon(True)
-            t3.start()
-            # data, sumaCapturado = capturaContinua(numeroCapturasAsincronas, intervaloCapturasAsincronas, a, n, data, i)
-        
+            t3.start()        
     except Exception as e:
+        # -------Llamado a Drone.py----------
         capturarVueloDrone("B")
         data['errorBd'] = "T"
         raise e
-
-    print(listaEspectros)
-    return json.dumps(data)
-
-# @app.route('/generarEspectros', methods=['POST'])
-# @cross_origin(origin='*', headers=['Content-Type','Authorization'])
+    finally:
+        return json.dumps(data)
 
 @app.route('/guardarWaypoints', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def guardarWaypoints():
-    global id_waypointsList, arrayPuntosDescanso, listaWaypoints#, vehicle, sitl
-    id_waypointsList = []
-    aPD = []
+    valores_waypoints.id_waypointsList = []
     data = request.get_json()
-    waypointsList = []
-    nombreMisionCrear = data['nombreMisionCrear']
-    arrayWaypoints = data['waypoints']
-    arrayWaypoints = arrayWaypoints.split("\n")
-    waypointsDic={}
-    for x in range(0,len(arrayWaypoints)):
-        waypointsDic["waypoint{0}".format(x)] = arrayWaypoints[x]#+arrayWaypoints[x+1]
-    # print(waypointsDic)
-    for i in range(0, len(waypointsDic)):
-        waypointsList.append(waypointsDic["waypoint{0}".format(i)])
-    a, arrayPuntosDescanso, puntoMedio =calcularDistanciaMetros(arrayWaypoints)
-    for i in range(0, len(arrayPuntosDescanso)):
-        aPD.append(str(arrayPuntosDescanso[i]))
+    arrayWaypoints = data['waypoints'].split("\n")
+    velocidad = int(data['velocidad'])
+    arrayPuntosDescanso, puntoMedio =calcularDistanciaMetros(arrayWaypoints, velocidad)
     data['arrayPuntosDescanso'] = puntoMedio
     data['errorBd'] = ""
-    print(a, aPD, puntoMedio)
-    listaWaypoints = waypointsList
     # ---------------------------LLAMADO A DRONE.PY------------------------
-    # FSM(1)
-    # sleep(.3)
-    # FSM(1)
-    # sleep(.3)
-    # FSM(waypointsList)
-    # sleep(.3)
     try:
-        estadoWaypoints(waypointsList)
+        estadoWaypoints(arrayWaypoints)
     except Exception as e:
         data['errorBd'] = "T"
         raise e
         return json.dumps(data)
-
     # ---------------------------------------------------------------------
     return json.dumps(data)
 
 @app.route('/guardarDescanso', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def guardarDescanso():
-    global remainingWp, puntoResume
     data = request.get_json()
     data['errorBd'] = ""
-    waypointsDescansoList = []
-    nombreMisionCrear = data['nombreMisionCrear']
     caract = data['caract']
     arrayWaypointsD = data['waypointsDescanso']
-    # arrayWaypointsD = arrayWaypointsD.split("\n")
-    # waypointsDic={}
-    # for x in range(0,len(arrayWaypointsD)):
-    #     waypointsDic["waypoint{0}".format(x)] = arrayWaypointsD[x]#+arrayWaypoints[x+1]
-    # # print(waypointsDic)
-    # for i in range(0, len(waypointsDic)):
-    #     waypointsDescansoList.append(waypointsDic["waypoint{0}".format(i)])
-    #     pass
-    
-    print("latlon",arrayWaypointsD)
-    print("#way",arrayPuntosDescanso)
-    print(caract)
-    # ---------construye un array que incluye los puntos de descanso en su lugar---------
-    # waypointsFinal = []
-    # j= 0
-    # punto = arrayPuntosDescanso.pop(0)
-    # for k in range(0,len(listaWaypoints)):
-    #     if punto==k:
-    #         waypointsFinal.append(arrayWaypointsD[j])
-    #         waypointsFinal.append(listaWaypoints[k])
-    #         print(arrayPuntosDescanso)
-    #         if arrayPuntosDescanso:
-    #             punto = arrayPuntosDescanso.pop(0)
-    #         j+=1
-    #     else:
-    #         waypointsFinal.append(listaWaypoints[k])
-    # print(waypointsFinal)
-
-    # ---------------------------LLAMADO A DRONE.PY------------------------
-    
-    remainingWp, puntoResume, home = estadoPauseSinc(caract, arrayWaypointsD)
-    # ---------------------------------------------------------------------
-    puntoResume = str(puntoResume).split(",")
-    
-    return json.dumps(data)
+    try:
+        # ---------------------------LLAMADO A DRONE.PY------------------------
+        valores_waypoints.remainingWp, valores_waypoints.puntoResume, home = estadoPauseSinc(caract, arrayWaypointsD)
+        # ---------------------------------------------------------------------
+        valores_waypoints.puntoResume = str(valores_waypoints.puntoResume).split(",")
+    except Exception as e:
+        data['errorBd'] = "T"
+        raise e
+    finally:
+        return json.dumps(data)
 
 @app.route('/armarDron', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -898,20 +703,16 @@ def armarDron():
     data = request.get_json()
     data['errorBd'] = ""
     data['errorArmado'] = ""
-    # ----------------------------------LLAMADO A DRONE.PY------------------------------
-    errorArmado = estadoArmado(1)
-    # sleep(0.3)
-    # FSM(1)
-    # ----------------------------------------------------------------------------------
-    # print(errorArmado)
-    data['errorArmado'] = errorArmado
     try:
-        # i
-        pass
+        # ----------------------------------LLAMADO A DRONE.PY------------------------------
+        errorArmado = estadoArmado(1)
+        # ----------------------------------------------------------------------------------
+        data['errorArmado'] = errorArmado
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/iniciarMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -919,113 +720,99 @@ def iniciarMision():
     data = request.get_json()
     try:
     # --------------------------------LLAMADO A DRONE.PY------------------------------
-        errorDespegue = estadoDespegue(firstHome)
-        # sleep(0.3)
-        # FSM(1)
+        errorDespegue = estadoDespegue(valores_waypoints.firstHome)
     # ----------------------------------------------------------------------------------
         data['errorDespegue'] = ""
-        # print(errorDespegue)
     except Exception as errorDespegue:
         data['errorDespegue'] = "T"
         raise errorDespegue
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/hover', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def hover():
-    global counterCal, counterH
     data = request.get_json()
     calibrarFlag = data['calibrarFlag']
-    print("CAl"+ str(calibrarFlag))
-    if calibrarFlag=="H":
-        counterH +=1
-    counterCal += 1
-    print(counterCal)
-    print(counterH)
-    if calibrarFlag == "H" and counterCal%2 == 0 and counterH < 2:
-        data["volverCapturar"] = "T"
-        counterH = 0
-    if counterCal%2 == 0:
-        calibrarFlag = "F"
-    # ----------------------------------LLAMADO A DRONE.PY------------------------------
-    hoverDrone(calibrarFlag)
-   # --------------------------------------------------------------------
-    return json.dumps(data)
+    try:
+        if calibrarFlag=="H":
+            valores_espectros.counterH +=1
+        valores_espectros.counterCal += 1
+        if calibrarFlag == "H" and valores_espectros.counterCal%2 == 0 and valores_espectros.counterH < 2:
+            data["volverCapturar"] = "T"
+            valores_espectros.counterH = 0
+        if valores_espectros.counterCal%2 == 0:
+            calibrarFlag = "F"
+        # ----------------------------------LLAMADO A DRONE.PY------------------------------
+        hoverDrone(calibrarFlag)
+       # --------------------------------------------------------------------
+    except Exception as e:
+        raise e
+    finally:
+        return json.dumps(data)
 
 @app.route('/pausarMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def pausarMision():
-    global remainingWp
     data = request.get_json()
     flagPausar = data['flagPausar']
     try:
     # ----------------------------------LLAMADO A DRONE.PY------------------------------
-        remainingWp = estadoPause(1, flagPausar)
-        # print(remainingWp)
+        valores_waypoints.remainingWp = estadoPause(1, flagPausar)
         data['errorPausa'] = "F"
-        # sleep(0.3)
-        # FSM(1)
     # ----------------------------------------------------------------------------------
     except Exception as errorPausa:
         data['errorPausa'] = "T"
         raise errorPausa
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/reanudarMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def reanudarMision():
     data = request.get_json()
-    # flagPausar = data['flagPausar'] 
     try:
-        print(str(puntoResume))
     # ----------------------------------LLAMADO A DRONE.PY------------------------------
-        if puntoResume == None:
-            errorDespegue = estadoResume(remainingWp, firstHome)
-        elif puntoResume[0] == "[]":
-            errorDespegue = estadoResume(remainingWp, firstHome)
+        if valores_waypoints.puntoResume == None:
+            errorDespegue = estadoResume(valores_waypoints.remainingWp, valores_waypoints.firstHome)
+        elif valores_waypoints.puntoResume[0] == "[]":
+            errorDespegue = estadoResume(valores_waypoints.remainingWp, valores_waypoints.firstHome)
         else:
-            errorDespegue = estadoResume(remainingWp, firstHome, float(puntoResume[0]), float(puntoResume[1]))
-        # sleep(0.3)
-        # FSM(1)
+            errorDespegue = estadoResume(valores_waypoints.remainingWp, valores_waypoints.firstHome, float(valores_waypoints.puntoResume[0]), float(valores_waypoints.puntoResume[1]))
     # ----------------------------------------------------------------------------------
         data['errorDespegue'] = ""
     except Exception as errorDespegue:
         data['errorDespegue'] = "T"
         raise errorDespegue
+    finally:
         return json.dumps(data)
-    return json.dumps(data)
 
 @app.route('/detenerMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def detenerMision():
-    global remainingWp, id_waypointsList, waypointActual, lat, lon, idSensorTierraVIS, idSensorTierraNIR, idSensorVueloVIS, idSensorVueloNIR 
-    global a, n, v, id_espectros
-    remainingWp = []
-    id_waypointsList = []
-    waypointActual = 0
-    lat = 0
-    lon = 0
-    idSensorTierraVIS = ""
-    idSensorTierraNIR = ""
-    idSensorVueloNIR = ""
-    idSensorVueloVIS = ""
-    a = []
-    v = []
-    n = []
-    id_espectros = 0
+    valores_waypoints.remainingWp = []
+    valores_waypoints.id_waypointsList = []
+    valores_waypoints.waypointActual = 0
+    valores_waypoints.lat = 0
+    valores_waypoints.lon = 0
+    valores_espectros.id_espectros = 0
+    valores_sensores.idSensorTierraVIS= ""
+    valores_sensores.idSensorTierraNIR= ""
+    valores_sensores.idSensorVueloNIR= ""
+    valores_sensores.idSensorVueloVIS= ""
+    valores_espectros.espectroBlanco= []
+    valores_espectros.espectroNegro = []
     data = request.get_json()
-    # flagPausar = data['flagPausar']
     try:
     # ----------------------------------LLAMADO A DRONE.PY------------------------------
         estadoCancel(1)
         data['errorDetener'] = "F"
-        # sleep(0.3)
-        # FSM(1)
     # ----------------------------------------------------------------------------------
     except Exception as errorDetener:
         data['errorDetener'] = "T"
         raise errorDetener
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/descargarInfo', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -1036,16 +823,20 @@ def descargarInfo():
     data = {}
     data['errorBd'] = ""
     nombreMisiones = []
+    try:
+        conn = conexion()
+        daoUsuarios = DaoUsuarios(conn)
+        usuario = daoUsuarios.getUsuarioLogin(nombreUsuario, password)
+        idUsuario = usuario.id
 
-    conn = conexion()
-    daoUsuarios = DaoUsuarios(conn)
-    usuario = daoUsuarios.getUsuarioLogin(nombreUsuario, password)
-    idUsuario = usuario.id
-
-    daoMision = DaoMision(conn)
-    misiones = daoMision.getAllMision(idUsuario)
-    data['misiones']= misiones
-    return json.dumps(data)
+        daoMision = DaoMision(conn)
+        misiones = daoMision.getAllMision(idUsuario)
+        data['misiones']= misiones
+    except Exception as e:
+        data['errorBd'] = "T"
+        raise e
+    finally:
+        return json.dumps(data)
 
 @app.route('/seleccionarMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -1055,10 +846,6 @@ def seleccionarMision():
     data['waypointsList'] = ""
     misionSeleccionada = data['misionSeleccionada']
     numWaypoints = []
-    # sensores = []
-    # espectros = []
-    # espectro = []
-    
     try:
         # Obtengo ID de mision
         conn = conexion()
@@ -1095,58 +882,49 @@ def seleccionarMision():
                     else:
                         print("else")
                         idWaypoint = espway.waypoints_id
-
                         daoWaypoints = DaoWaypoints(conn)
                         daoWaypoints.borrarWaypoint(idWaypoint)
-
                         daoEspectros.borrarEspectros(idEspectro)
 
         daoWaypoints = DaoWaypoints(conn)
         waypointsList = daoWaypoints.getAllWaypoints(idMision)
         for i in range(0, len(waypointsList)):
             numWaypoints.append(str(waypointsList[i].num_waypoint))
-        # poner generate
-
-        print(numWaypoints)
         conn.close()
         data['waypoints'] = numWaypoints
         pass
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/borrarMision', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def borrarMision():
     data = request.get_json()
     misionSeleccionada = data['misionSeleccionada']
-    print(misionSeleccionada)
     try:
         conn = conexion()
         daoMision = DaoMision(conn)
         mision = daoMision.getMisionNombre(misionSeleccionada)
         idMision = mision.id
-        print(idMision)
         daoMision.borrarMision(idMision)
         conn.close()
         data['errorBd'] = "F"
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/verEspectro', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def verEspectro():
     data = request.get_json()
     data['errorBd'] = ""
-    data['waypointsList'] = ""
-    data['espectroC'] = ""
-    data['espectroR'] = ""
     nombreMisionCrear = data['nombreMisionCrear']
     waypointSeleccionado = data['waypointSeleccionado']
-    print(waypointSeleccionado)
     try:
         conn = conexion()
         daoMision = DaoMision(conn)
@@ -1172,30 +950,21 @@ def verEspectro():
             encoded_string = base64.b64encode(image_file.read())
             encoded_string = encoded_string.decode("utf-8")
         data['espectroC'] = encoded_string
-
-        # with open("D:/Tesis/Api/Flask/imagenEspectroC2.png", "rb") as image_file:
-        #     encoded_string = base64.b64encode(image_file.read())
-        #     encoded_string = encoded_string.decode("utf-8")
-        # data['espectroR'] = encoded_string
-        pass
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/guardarEspectro', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
 def guardarEspectro():
     data = request.get_json()
     data['errorBd'] = ""
-    data['waypointsList'] = ""
-    data['espectroC'] = ""
-    data['espectroR'] = ""
     nombreMisionCrear = data['nombreMisionCrear']
     waypointSeleccionado = data['waypointSeleccionado']
     ruta = str(data['ruta'])
     usuario = str(data['usuario'])
-    print(ruta)
     filePath = FileManagement.to_relative(ruta)
     try:
         if os.path.isdir(filePath):
@@ -1207,8 +976,7 @@ def guardarEspectro():
             daoWaypoints = DaoWaypoints(conn)
             wayp = daoWaypoints.getWaypointByNumber(waypointSeleccionado, idMision)
             idWayp = wayp.id
-            latlon = wayp.latlon
-            latlon = latlon.split(",")
+            latlon = wayp.latlon.split(",")
 
             daoEspway = DaoEspway(conn)
             espway = daoEspway.getEspwayWaypoint(idWayp)
@@ -1219,16 +987,14 @@ def guardarEspectro():
             resultado = espectro.resultado
             conn.close()
             filePath += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "Waypoint("+waypointSeleccionado+")"
-            
-            print(filePath)
             generate(resultado, filePath, float(latlon[0]), float(latlon[1]), altura)
         else:
-            print("no existe ruta")
             data['errorCarpeta'] = "T"
     except Exception as errorBd:
         data['errorBd'] = "T"
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 @app.route('/guardarTodos', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type','Authorization'])
@@ -1252,17 +1018,18 @@ def guardarTodos():
             altura = mision.elevacion
             daoWaypoints = DaoWaypoints(conn)
             waypointsList = daoWaypoints.getAllWaypoints2(idMision)
+            print(waypointsList[0].id, waypointsList[1].id) #272" lista de obj
             for i in range(0, len(waypointsList)):
                 idsWaypoints.append(waypointsList[i].id)
                 latlonsWaypoints.append(waypointsList[i].latlon)
-            print(idsWaypoints)
-
+            print(idsWaypoints) #
+            print("J")
+            print(latlonsWaypoints)
             for i in range(0, len(idsWaypoints)):
                 daoEspway = DaoEspway(conn)
                 espway = daoEspway.getEspwayWaypoint(idsWaypoints[i])
                 idEspectro = espway.espectros_id
                 idsEspectros.append(idEspectro)
-            print(idsEspectros)
 
             for i in range(0, len(idsEspectros)):
                 latlons = latlonsWaypoints[i].split(",")
@@ -1272,22 +1039,16 @@ def guardarTodos():
                 resultado = espectro.resultado
                 rutaG += "/Usuario("+usuario+")"+"Mision("+nombreMisionCrear+")"+ "WaypointNumber("+str(i)+")"
                 # filePath = FileManagement.to_relative(rutaG)
-                print(rutaG)
                 generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), altura)
-
-                # generate(resultado, rutaG, float(latlons[0]), float(latlons[1]), 5)
             conn.close()
         else:
             data['errorCarpeta'] = "T"
-        # with open("D:/Tesis/Api/Flask/imagenEspectroC2.png", "rb") as image_file:
-        #     encoded_string = base64.b64encode(image_file.read())
-        #     encoded_string = encoded_string.decode("utf-8")
-        # data['espectroR'] = encoded_string
-        pass
     except Exception as errorBd:
         data['errorBd'] = "T"
+        print("Error en guardarTodos: ", errorBd)
         raise errorBd
-    return json.dumps(data)
+    finally:
+        return json.dumps(data)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
